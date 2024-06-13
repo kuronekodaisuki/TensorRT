@@ -4,9 +4,8 @@
 #endif
 #include <opencv2/opencv.hpp>
 
-#include "../iJSON.h"
 
-class Object: public iJSON
+class Object
 {
 public:
     cv::Rect_<float> rect;
