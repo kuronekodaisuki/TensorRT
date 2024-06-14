@@ -9,10 +9,10 @@
 #ifdef WIN32
 #pragma warning(disable: 4819)
 #endif
-#include <NvInfer.h>
-#include <NvInferRuntime.h>
-#include <NvUffParser.h>
-#include <NvOnnxConfig.h>
+//#include <NvInfer.h>
+//#include <NvInferRuntime.h>
+//#include <NvUffParser.h>
+//#include <NvOnnxConfig.h>
 #include <NvOnnxParser.h>
 #include <cuda_runtime_api.h>
 
@@ -65,7 +65,7 @@ bool TensorRT::ConvertModel(const char* filepath, uint width, uint height, uint 
 
 void TensorRT::AllocateBuffers()
 {
-    auto dimensions = _engine->getBindingDimensions(1); // getTensorShape("output");
+    auto dimensions = _engine->getTensorShape("output");
 
     _output_size = 1;
     for (int j = 0; j < dimensions.nbDims; j++)
@@ -105,6 +105,7 @@ bool TensorRT::LoadModel(const char* filepath, uint width, uint height, uint cha
             _runtime = createInferRuntime(logger);
             _network = _builder->createNetworkV2(flags);
             nvonnxparser::IParser* parser = nvonnxparser::createParser(*_network, logger);
+            
             if (parser->parseFromFile(filepath, verbosity))
             {
                 IBuilderConfig* config = _builder->createBuilderConfig();
@@ -165,7 +166,7 @@ bool TensorRT::LoadEngine(const char* filepath, uint width, uint height, uint ch
 
     if (_engine != nullptr)
     {
-        auto dimensions = _engine->getBindingDimensions(1);
+        auto dimensions = _engine->getTensorShape("output");
 
 #ifdef _DEBUG
         for (int i = 0; i < _engine->getNbIOTensors(); i++)
@@ -346,7 +347,7 @@ void TensorRT::doInference(const char* inputBlobName, const char* outputBlobName
 
     // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
     CHECK(cudaMemcpyAsync(buffers[input], _input, _channels * _height * _width * sizeof(float), cudaMemcpyHostToDevice, stream));
-    (_context->enqueueV2(buffers, stream, nullptr));
+    (_context->enqueueV3(stream));
     CHECK(cudaMemcpyAsync(_output, buffers[output], _output_size * sizeof(float), cudaMemcpyDeviceToHost, stream));
     cudaStreamSynchronize(stream);
 

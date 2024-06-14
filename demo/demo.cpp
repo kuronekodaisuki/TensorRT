@@ -8,10 +8,13 @@ int main(int argc, char* argv[])
 {
     cv::Mat image;
     cv::VideoCapture capture;
+    YOLOX yolox;
 
     switch (argc)
     {
-
+    case 3:
+        capture.open(argv[2]);
+        yolox.LoadEngine(argv[1], 640, 640);
     }
 }
 
