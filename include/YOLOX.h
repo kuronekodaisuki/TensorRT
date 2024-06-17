@@ -63,6 +63,7 @@ public:
     /// <param name="names">category labels</param>
     /// <param name="colors">category colors</param>
     void DrawObjects(cv::Mat& image, const char* names[], const float colors[][3], float threshold = BBOX_CONF_THRESH);
+    void DrawObjects(cv::Mat& image, const char* labels[], float threshold = BBOX_CONF_THRESH);
 
 protected:
     void blobFromImage(cv::Mat& image, bool bgr2rgb = true);

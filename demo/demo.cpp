@@ -22,6 +22,11 @@ bool FileExists(const char *name)
 #define MODEL_WIDTH 640
 #define MODEL_HEIGHT 640
 
+const char* labels[] = 
+{
+    #include "../include/coco_80_labels.h"
+};
+
 int main(int argc, char* argv[])
 {
     cv::Mat image;
@@ -55,6 +60,8 @@ int main(int argc, char* argv[])
         for (bool loop = true; loop && capture.read(image); )
         {
             yolo.Detect(image);
+            yolo.DrawObjects(image, labels);
+            cv::imshow("Image", image);
             switch (cv::waitKey(1))
             {
             case 'q':
