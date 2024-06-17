@@ -1,10 +1,10 @@
 #include "YOLOv9.hpp"
 
-YOLOv9::YOLOv9()
+YOLOv9::YOLOv9(): TensorRT()
 {
 }
 
-YOLOv9::~YOLOv9()
+YOLOv9::~YOLOv9(): ~TensorRT()
 {
 }
 
