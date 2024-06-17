@@ -1,6 +1,6 @@
 #include "YOLOv9.hpp"
 
-YOLOv9::YOLOv9(/* args */)
+YOLOv9::YOLOv9()
 {
 }
 

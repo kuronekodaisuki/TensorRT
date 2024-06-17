@@ -5,7 +5,7 @@
 class YOLOv9: public TensorRT
 {
 public:
-    YOLOv9(/* args */);
+    YOLOv9();
     ~YOLOv9();
 
     /// <summary>

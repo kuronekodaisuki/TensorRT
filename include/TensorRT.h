@@ -67,7 +67,7 @@ public:
     /// <param name="channels">channels of model</param>
     /// <param name="prescision"></param>
     /// <returns>false if failed to load</returns>
-    virtual bool LoadModel(const char* filepath, uint width, uint height, uint channels, PRECISION precision = FP16);
+    virtual bool LoadModel(const char* filepath, uint width, uint height, uint channels = 3, PRECISION precision = FP16);
 
     virtual bool LoadEngine(const char* filepath, uint width, uint height, uint channels);
     void SaveEngine(const char* filepath);
