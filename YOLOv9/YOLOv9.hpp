@@ -1,4 +1,5 @@
 #ifndef YOLOv9_INCLUDED
+#include "../include/Object.h"
 #include "../include/TensorRT.h"
 
 class YOLOv9: public TensorRT
