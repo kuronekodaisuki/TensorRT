@@ -68,13 +68,7 @@
       <EnableUAC>false</EnableUAC>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y $(TENSORRT_DIR)\lib\nvinfer.dll $(OutDir)
-copy /Y $(TENSORRT_DIR)\lib\nvinfer_builder_resource.dll $(OutDir)
-copy /Y $(TENSORRT_DIR)\lib\nvinfer_plugin.dll $(OutDir)
-copy /Y $(TENSORRT_DIR)\lib\nvonnxparser.dll $(OutDir)
-copy /Y $(TENSORRT_DIR)\lib\nvparsers.dll $(OutDir)
-copy /Y "$(CUDA_PATH)\bin\cudnn*.dll" $(OutDir)
-copy /Y ..\3rdparty\zlibwapi.dll $(OutDir)</Command>
+      <Command></Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -98,12 +92,7 @@ copy /Y ..\3rdparty\zlibwapi.dll $(OutDir)</Command>
       <EnableUAC>false</EnableUAC>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y $(TENSORRT_DIR)\lib\nvinfer.dll $(OutDir)
-copy /Y $(TENSORRT_DIR)\lib\nvinfer_builder_resource.dll $(OutDir)
-copy /Y $(TENSORRT_DIR)\lib\nvinfer_plugin.dll $(OutDir)
-copy /Y $(TENSORRT_DIR)\lib\nvonnxparser.dll $(OutDir)
-copy /Y $(TENSORRT_DIR)\lib\nvparsers.dll $(OutDir)
-copy /Y "$(CUDA_PATH)\bin\cudnn*.dll" $(OutDir)</Command>
+      <Command></Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
