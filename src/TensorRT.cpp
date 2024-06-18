@@ -65,7 +65,7 @@ bool TensorRT::ConvertModel(const char* filepath, uint width, uint height, uint 
 
 void TensorRT::AllocateBuffers()
 {
-    auto dimensions = _engine->getBindingDimensions(1); // getTensorShape("output");
+    auto dimensions = _engine->getTensorShape("output");
 
     _output_size = 1;
     for (int j = 0; j < dimensions.nbDims; j++)
@@ -172,8 +172,8 @@ bool TensorRT::LoadEngine(const char* filepath, uint width, uint height, uint ch
         {
             const char* name = _engine->getBindingName(i);
             const char* desc = _engine->getBindingFormatDesc(i);
-            Dims dimenstion = _engine->getBindingDimensions(i);
-            DataType type = _engine->getBindingDataType(i);
+            Dims dimenstion = _engine->getTensorShape(name);
+            DataType type = _engine->getTensorDataType(name);
             TensorFormat format = _engine->getBindingFormat(i);
             printf("Binding[%d], %s Description:%s\n", i, name, desc);
         }
@@ -329,12 +329,24 @@ void TensorRT::doInference(const char* inputBlobName, const char* outputBlobName
     int input = 0;
     int output = 1;
     if (inputBlobName != nullptr)
+    {
         input = _engine->getBindingIndex(inputBlobName);
+    }
+    else
+    {
+        inputBlobName = _engine->getBindingName(input);
+    }
     if (outputBlobName != nullptr)
+    {
         output = _engine->getBindingIndex(outputBlobName);
+    }
+    else
+    {
+        outputBlobName = _engine->getBindingName(output);
+    }
 
-    assert(_engine->getBindingDataType(input) == DataType::kFLOAT);
-    assert(_engine->getBindingDataType(output) == DataType::kFLOAT);
+    assert(_engine->getTensorDataType(inputBlobName) == DataType::kFLOAT);
+    assert(_engine->getTensorDataType(outputBlobName) == DataType::kFLOAT);
 
     // Create GPU buffers on device
     CHECK(cudaMalloc(&buffers[input], _channels * _height * _width * sizeof(float)));
@@ -346,7 +358,7 @@ void TensorRT::doInference(const char* inputBlobName, const char* outputBlobName
 
     // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
     CHECK(cudaMemcpyAsync(buffers[input], _input, _channels * _height * _width * sizeof(float), cudaMemcpyHostToDevice, stream));
-    (_context->enqueueV2(buffers, stream, nullptr));
+    (_context->enqueueV3(stream));
     CHECK(cudaMemcpyAsync(_output, buffers[output], _output_size * sizeof(float), cudaMemcpyDeviceToHost, stream));
     cudaStreamSynchronize(stream);
 
