@@ -46,12 +46,12 @@ int main(int argc, char* argv[])
             }
         }
         else
-        {
+        { 
             yolo.LoadEngine(ENGINE_FILE, MODEL_WIDTH, MODEL_HEIGHT);
         }
         break;
     default:
-        puts("Usage: YOLOv9 <model> <input image>");
+        puts("Usage: YOLOX <model> <input image>");
         return 0;
     }
 
@@ -59,6 +59,7 @@ int main(int argc, char* argv[])
     {
         for (bool loop = true; loop && capture.read(image); )
         {
+            cv::imshow("Image", image);
             yolo.Detect(image);
             yolo.DrawObjects(image, labels);
             cv::imshow("Image", image);
@@ -72,6 +73,10 @@ int main(int argc, char* argv[])
                 break;
             }
         }
+    }
+    else
+    {
+        printf("Can't open %s\n", argv[2]);
     }
 }
 
