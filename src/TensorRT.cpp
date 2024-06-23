@@ -65,13 +65,30 @@ bool TensorRT::ConvertModel(const char* filepath, uint width, uint height, uint 
 
 void TensorRT::AllocateBuffers()
 {
-    auto dimensions = _engine->getTensorShape("output");
+#ifdef _DEBUG
+    for (int i = 0; i < _engine->getNbIOTensors(); i++)
+    {
+        const char* name = _engine->getBindingName(i);
+        const char* desc = _engine->getBindingFormatDesc(i);
+        Dims dimenstion = _engine->getTensorShape(name);
+        DataType type = _engine->getTensorDataType(name);
+        TensorFormat format = _engine->getBindingFormat(i);
+        printf("Binding[%d], %s Description:%s\n", i, name, desc);
+    }
+#endif
 
+    auto dimensions = _engine->getBindingDimensions(1);
+#ifdef _DEBUG
+    printf("%d dimensions\n", dimensions.nbDims);
+#endif
     _output_size = 1;
     for (int j = 0; j < dimensions.nbDims; j++)
     {
         _output_size *= dimensions.d[j];
         _output_shape.push_back(dimensions.d[j]);
+#ifdef _DEBUG
+        printf("%d size:%d\n", j, dimensions.d[j]);
+#endif
     }
     _output = new float[_output_size];
     _input = new float[_width * _height * _channels];
@@ -104,7 +121,11 @@ bool TensorRT::LoadModel(const char* filepath, uint width, uint height, uint cha
             _builder = createInferBuilder(logger);
             _runtime = createInferRuntime(logger);
             _network = _builder->createNetworkV2(flags);
+#ifdef _DEBUG
+            printf("Loading %s\n", filepath);
+#endif
             nvonnxparser::IParser* parser = nvonnxparser::createParser(*_network, logger);
+
             if (parser->parseFromFile(filepath, verbosity))
             {
                 IBuilderConfig* config = _builder->createBuilderConfig();
@@ -112,9 +133,11 @@ bool TensorRT::LoadModel(const char* filepath, uint width, uint height, uint cha
                 {
                 case INT8:
                     config->setFlag(BuilderFlag::kINT8);
+                    puts("INT8");
                     break;
                 case FP16:
                     config->setFlag(BuilderFlag::kFP16);
+                    puts("FP16");
                     break;
                 }
 
@@ -166,18 +189,6 @@ bool TensorRT::LoadEngine(const char* filepath, uint width, uint height, uint ch
     if (_engine != nullptr)
     {
         auto dimensions = _engine->getBindingDimensions(1);
-
-#ifdef _DEBUG
-        for (int i = 0; i < _engine->getNbIOTensors(); i++)
-        {
-            const char* name = _engine->getBindingName(i);
-            const char* desc = _engine->getBindingFormatDesc(i);
-            Dims dimenstion = _engine->getTensorShape(name);
-            DataType type = _engine->getTensorDataType(name);
-            TensorFormat format = _engine->getBindingFormat(i);
-            printf("Binding[%d], %s Description:%s\n", i, name, desc);
-        }
-#endif
 
         AllocateBuffers();
 
@@ -358,7 +369,7 @@ void TensorRT::doInference(const char* inputBlobName, const char* outputBlobName
 
     // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
     CHECK(cudaMemcpyAsync(buffers[input], _input, _channels * _height * _width * sizeof(float), cudaMemcpyHostToDevice, stream));
-    (_context->enqueueV3(stream));
+    (_context->enqueueV2(buffers, stream, nullptr));
     CHECK(cudaMemcpyAsync(_output, buffers[output], _output_size * sizeof(float), cudaMemcpyDeviceToHost, stream));
     cudaStreamSynchronize(stream);
 
