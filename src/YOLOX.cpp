@@ -1,10 +1,10 @@
 #include "YOLOX.h"
 
 
-#define INPUT_BLOB_NAME "images"
-#define OUTPUT_BLOB_NAME "output"
+//#define INPUT_BLOB_NAME "images"
+//#define OUTPUT_BLOB_NAME "output"
 
-YOLOX::YOLOX()
+YOLOX::YOLOX(): _numClasses(80)
 {
 }
 

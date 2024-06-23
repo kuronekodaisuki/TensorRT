@@ -65,17 +65,42 @@ bool TensorRT::ConvertModel(const char* filepath, uint width, uint height, uint 
 
 void TensorRT::AllocateBuffers()
 {
-#ifdef _DEBUG
+//#ifdef _DEBUG
     for (int i = 0; i < _engine->getNbIOTensors(); i++)
     {
         const char* name = _engine->getBindingName(i);
         const char* desc = _engine->getBindingFormatDesc(i);
-        Dims dimenstion = _engine->getTensorShape(name);
-        DataType type = _engine->getTensorDataType(name);
+        Dims dimension = _engine->getTensorShape(name);
+        const char* type = "";
+        switch (_engine->getTensorDataType(name))
+        {
+        case DataType::kFLOAT:
+            type = "FP32";
+            break;
+        case DataType::kHALF:
+            type = "FP16";
+            break;
+        case DataType::kINT8:
+            type = "INT8";
+            break;
+        case DataType::kINT32:
+            type = "INT32";
+            break;
+        case DataType::kUINT8:
+            type = "UINT8";
+            break;
+        case DataType::kBOOL:
+            type = "BOOL";
+            break;
+        }
         TensorFormat format = _engine->getBindingFormat(i);
-        printf("Binding[%d], %s Description:%s\n", i, name, desc);
+        printf("Binding[%d], %s %s[%d]\n", i, name, type, dimension.nbDims);
+        for (int j = 0; j < dimension.nbDims; j++)
+        {
+            printf("\t%d\n", dimension.d[j]);
+        }
     }
-#endif
+//#endif
 
     auto dimensions = _engine->getBindingDimensions(1);
 #ifdef _DEBUG
@@ -369,7 +394,9 @@ void TensorRT::doInference(const char* inputBlobName, const char* outputBlobName
 
     // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
     CHECK(cudaMemcpyAsync(buffers[input], _input, _channels * _height * _width * sizeof(float), cudaMemcpyHostToDevice, stream));
+    
     (_context->enqueueV2(buffers, stream, nullptr));
+
     CHECK(cudaMemcpyAsync(_output, buffers[output], _output_size * sizeof(float), cudaMemcpyDeviceToHost, stream));
     cudaStreamSynchronize(stream);
 
