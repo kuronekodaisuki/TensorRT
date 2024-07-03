@@ -2,7 +2,7 @@
 #ifndef __80_CATEGORIES_H__
 #define __80_CATEGORIES_H__
 
-const float color_list[][3] =
+static const float color_list[][3] =
 {
     {0.000, 0.447, 0.741},
     {0.850, 0.325, 0.098},
@@ -86,7 +86,7 @@ const float color_list[][3] =
     {0.50, 0.5, 0}
 };
 
-const char* class_names[] =
+static const char* class_names[] =
 {
         "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
         "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
