@@ -22,10 +22,10 @@ bool FileExists(const char *name)
 #define MODEL_WIDTH 640
 #define MODEL_HEIGHT 640
 
-const char* labels[] = 
-{
-    #include "../include/coco_80_labels.h"
-};
+//const char* labels[] = 
+//{
+//    #include "../include/coco_80_labels.h"
+//};
 
 int main(int argc, char* argv[])
 {
