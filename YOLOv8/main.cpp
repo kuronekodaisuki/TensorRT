@@ -1,7 +1,7 @@
 #include "YOLOv8.h"
 
-const char* MODEL = "../models/yolov8n.onnx";
-const char* ENGINE = "../models/yolov8n.engine";
+const char* MODEL = "../models/yolov8s.onnx";
+const char* ENGINE = "../models/yolov8s.engine";
 const int MODEL_WIDTH = 640;
 const int MODEL_HEIGHT = 640;
 
