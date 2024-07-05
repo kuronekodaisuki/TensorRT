@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <CUDA_PATH>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.7</CUDA_PATH>
     <TENSORRT_DIR>C:\TensorRT-8.5.1.7</TENSORRT_DIR>
   </PropertyGroup>
   <PropertyGroup />
@@ -25,10 +24,6 @@ copy /Y ..\3rdparty\zlibwapi.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <BuildMacro Include="CUDA_PATH">
-      <Value>$(CUDA_PATH)</Value>
-      <EnvironmentVariable>true</EnvironmentVariable>
-    </BuildMacro>
     <BuildMacro Include="TENSORRT_DIR">
       <Value>$(TENSORRT_DIR)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
