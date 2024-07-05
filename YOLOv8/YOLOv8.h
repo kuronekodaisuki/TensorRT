@@ -8,7 +8,7 @@
 
 
 #define NMS_THRESH 0.45f
-#define BBOX_CONF_THRESH 0.3f
+#define BBOX_CONF_THRESH 0.25f
 
 typedef struct
 {

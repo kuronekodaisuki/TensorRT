@@ -52,6 +52,7 @@ int main(int argc, char* argv[])
 		cv::VideoCapture camera;
 		if (camera.open(0))
 		{
+			camera.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 			for (bool loop = true; loop && camera.read(image);)
 			{
 				std::vector<Object> objects = yolo.Detect(image);
