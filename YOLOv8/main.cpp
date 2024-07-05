@@ -33,4 +33,15 @@ int main(int argc, char* argv[])
 			yolo.SaveEngine(ENGINE);
 		}
 	}
+
+	cv::Mat image;
+	if (2 <= argc)
+	{
+		image = cv::imread(argv[1]);
+		std::vector<Object> objects = yolo.Detect(image);
+		for (const Object& object : objects)
+		{
+			//object.Draw(image);
+		}
+	}
 }

@@ -10,6 +10,15 @@
 #define NMS_THRESH 0.45f
 #define BBOX_CONF_THRESH 0.3f
 
+typedef struct
+{
+	float cx;
+	float cy;
+	float w;
+	float h;
+	float scores[80];
+} CHANNEL;
+
 class YOLOv8 : public TensorRT
 {
 public:
@@ -45,7 +54,7 @@ private:
 	std::vector<GridAndStride> _grid_strides;
 
 	std::vector<GridAndStride> generate_grids_and_stride();
-	void generate_proposals(float prob_threshold);
+	void generate_proposals(float scaleX, float scaleY, float prob_threshold);
 	std::vector<int> nms(float nms_threshold);
 
 };

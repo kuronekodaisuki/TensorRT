@@ -44,7 +44,7 @@ void YOLOv8::preProcess(cv::Mat& image)
 std::vector<Object> YOLOv8::postProcess(float scaleX, float scaleY)
 {
     _proposals.clear();
-    generate_proposals(_bbox_confidential_threshold);
+    generate_proposals(scaleX, scaleY, _bbox_confidential_threshold);
 
     if (2 <= _proposals.size())
     {
@@ -59,40 +59,32 @@ std::vector<Object> YOLOv8::postProcess(float scaleX, float scaleY)
     for (size_t i = 0; i < count; i++)
     {
         _objects[i] = _proposals[picked[i]];
-
-        _objects[i].rect.x /= scaleX;
-        _objects[i].rect.y /= scaleY;
-        _objects[i].rect.width /= scaleX;
-        _objects[i].rect.height /= scaleY;
     }
-
+    printf("%ld %ld\n", _proposals.size(), _objects.size());
 	return _objects;
 }
 
-std::vector<YOLOv8::GridAndStride> YOLOv8::generate_grids_and_stride()
+void YOLOv8::generate_proposals(float scaleX, float scaleY, float prob_threshold)
 {
-    std::vector<int> strides = { 8, 16, 32 };
+    int channels = _output_shape[1];
+    int anchors = _output_shape[2];
+    cv::Mat output = cv::Mat(channels, anchors, CV_32F, _output);
+    output = output.t();
 
-    std::vector<GridAndStride> grid_strides;
-    for (auto stride : strides)
+    for (int i = 0; i < anchors; i++)
     {
-        int num_grid_y = _height / stride;
-        int num_grid_x = _width / stride;
-        for (int g1 = 0; g1 < num_grid_y; g1++)
+        CHANNEL* channel = (CHANNEL*)output.row(i).ptr<float>();
+        float* maxScorePtr = std::max_element(channel->scores, channel->scores + _numClasses);
+        if (_bbox_confidential_threshold < *maxScorePtr)
         {
-            for (int g0 = 0; g0 < num_grid_x; g0++)
-            {
-                grid_strides.push_back(GridAndStride(g0, g1, stride));
-            }
+            float left = (channel->cx - channel->w / 2) / scaleX;
+            float top = (channel->cy - channel->h / 2) / scaleY;
+            Object object = { {left, top, channel->w / scaleX, channel->h / scaleY}, maxScorePtr - channel->scores, *maxScorePtr};
+            _proposals.push_back(object);
         }
     }
-    _numClasses = _output_shape[2] - 5;
 
-    return grid_strides;
-}
-
-void YOLOv8::generate_proposals(float prob_threshold)
-{
+    /*
     const size_t num_anchors = _grid_strides.size();
 
     for (size_t anchor_idx = 0; anchor_idx < num_anchors; anchor_idx++)
@@ -132,6 +124,7 @@ void YOLOv8::generate_proposals(float prob_threshold)
         } // class loop
 
     } // point anchor loop
+    */
 }
 
 std::vector<int> YOLOv8::nms(float nms_threshold)
@@ -167,4 +160,26 @@ std::vector<int> YOLOv8::nms(float nms_threshold)
             picked.push_back((int)i);
     }
     return picked;
+}
+
+std::vector<YOLOv8::GridAndStride> YOLOv8::generate_grids_and_stride()
+{
+    std::vector<int> strides = { 8, 16, 32 };
+
+    std::vector<GridAndStride> grid_strides;
+    for (auto stride : strides)
+    {
+        int num_grid_y = _height / stride;
+        int num_grid_x = _width / stride;
+        for (int g1 = 0; g1 < num_grid_y; g1++)
+        {
+            for (int g0 = 0; g0 < num_grid_x; g0++)
+            {
+                grid_strides.push_back(GridAndStride(g0, g1, stride));
+            }
+        }
+    }
+    _numClasses = _output_shape[2] - 5;
+
+    return grid_strides;
 }
