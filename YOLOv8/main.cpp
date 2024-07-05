@@ -1,3 +1,4 @@
+#include <opencv2/opencv.hpp>
 #include "YOLOv8.h"
 
 const char* MODEL = "../models/yolov8s.onnx";
@@ -43,6 +44,34 @@ int main(int argc, char* argv[])
 		{
 			objects[i].Draw(image);
 		}
+		cv::imwrite("out.png", image);
 	}
-	cv::imwrite("out.png", image);
+	else
+	{
+		cv::VideoCapture camera;
+		if (camera.open(0))
+		{
+			for (bool loop = true; loop && camera.read(image);)
+			{
+				std::vector<Object> objects = yolo.Detect(image);
+				for (int i = 0; i < objects.size(); i++)
+				{
+					objects[i].Draw(image);
+				}
+				cv::imshow("out", image);
+
+				switch (cv::waitKey(1))
+				{
+				case 'q':
+					loop = false;
+					break;
+
+				case ' ':
+					cv::imwrite("out.png", image);
+					break;
+				}
+			}
+		}
+	}
+
 }
