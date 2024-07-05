@@ -1,4 +1,5 @@
 #include "YOLOv8.h"
+#include "../include/Object.h"
 
 const char* MODEL = "../models/yolov8s.onnx";
 const char* ENGINE = "../models/yolov8s.engine";
@@ -34,14 +35,14 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	cv::Mat image;
 	if (2 <= argc)
 	{
-		image = cv::imread(argv[1]);
+		cv::Mat image = cv::imread(argv[1]);
 		std::vector<Object> objects = yolo.Detect(image);
-		for (const Object& object : objects)
+		for (int i = 0; i < objects.size(); i++)
 		{
-			//object.Draw(image);
+			objects[i].Draw(image);
 		}
+		cv::imwrite("out.png", image);
 	}
 }
