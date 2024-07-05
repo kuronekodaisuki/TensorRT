@@ -60,7 +60,9 @@ std::vector<Object> YOLOv8::postProcess(float scaleX, float scaleY)
     {
         _objects[i] = _proposals[picked[i]];
     }
+#ifdef _DEBUG
     printf("%ld %ld\n", _proposals.size(), _objects.size());
+#endif
 	return _objects;
 }
 
@@ -119,3 +121,4 @@ std::vector<int> YOLOv8::nms(float nms_threshold)
     }
     return picked;
 }
+

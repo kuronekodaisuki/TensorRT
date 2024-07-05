@@ -70,9 +70,11 @@ public:
     virtual bool LoadModel(const char* filepath, uint width, uint height, uint channels = 3, PRECISION precision = FP16);
 
     virtual bool LoadEngine(const char* filepath, uint width, uint height, uint channels = 3);
+    
     void SaveEngine(const char* filepath);
 
-    void ShowResized(const char* title);
+    //void ShowResized(const char* title);
+
     cv::Size GetScaledSize() {
         return cv::Size(_width, _height);
     }

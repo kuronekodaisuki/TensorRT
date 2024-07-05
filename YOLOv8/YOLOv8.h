@@ -32,19 +32,16 @@ protected:
 	void preProcess(cv::Mat& image);
 	std::vector<Object> postProcess(float scaleX, float scaleY);
 
+	void generate_proposals(float scaleX, float scaleY, float prob_threshold);
+	std::vector<int> nms(float nms_threshold);
+
 private:
 	float _nms_threshold = NMS_THRESH;
 	float _bbox_confidential_threshold = BBOX_CONF_THRESH;
 	uint _numClasses;
-	//float _scaleX;
-	//float _scaleY;
 
 	std::vector<Object> _proposals;
 	std::vector<Object> _objects;
-
-	void generate_proposals(float scaleX, float scaleY, float prob_threshold);
-	std::vector<int> nms(float nms_threshold);
-
 };
 
 #define YOLOv8_INCLUDED

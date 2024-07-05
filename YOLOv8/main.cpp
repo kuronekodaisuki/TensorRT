@@ -1,3 +1,4 @@
+#include <opencv2/opencv.hpp>
 #include "YOLOv8.h"
 #include "../include/Object.h"
 
@@ -35,9 +36,10 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	cv::Mat image;
 	if (2 <= argc)
 	{
-		cv::Mat image = cv::imread(argv[1]);
+		image = cv::imread(argv[1]);
 		std::vector<Object> objects = yolo.Detect(image);
 		for (int i = 0; i < objects.size(); i++)
 		{
@@ -45,4 +47,32 @@ int main(int argc, char* argv[])
 		}
 		cv::imwrite("out.png", image);
 	}
+	else
+	{
+		cv::VideoCapture camera;
+		if (camera.open(0))
+		{
+			for (bool loop = true; loop && camera.read(image);)
+			{
+				std::vector<Object> objects = yolo.Detect(image);
+				for (int i = 0; i < objects.size(); i++)
+				{
+					objects[i].Draw(image);
+				}
+				cv::imshow("out", image);
+
+				switch (cv::waitKey(1))
+				{
+				case 'q':
+					loop = false;
+					break;
+
+				case ' ':
+					cv::imwrite("out.png", image);
+					break;
+				}
+			}
+		}
+	}
+
 }

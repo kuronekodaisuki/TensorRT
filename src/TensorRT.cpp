@@ -324,10 +324,12 @@ void TensorRT::blobFromImage(cv::Mat& image, bool bgr2rgb)
     }
 }
 
+/*
 void TensorRT::ShowResized(const char* title)
 {
 	cv::imshow(title, _resized);
 }
+*/
 
 /// <summary>
 /// Convert image from tensor(1, channels, width, height)
