@@ -30,15 +30,19 @@ public:
 
 protected:
 	void preProcess(cv::Mat& image);
-	std::vector<Object> postProcess(float scaleX, float scaleY);
+	std::vector<Object> postProcess();
 
-	void generate_proposals(float scaleX, float scaleY, float prob_threshold);
+	void generate_proposals(float prob_threshold);
 	std::vector<int> nms(float nms_threshold);
 
 private:
 	float _nms_threshold = NMS_THRESH;
 	float _bbox_confidential_threshold = BBOX_CONF_THRESH;
 	uint _numClasses;
+	float _scale;
+	int _offset_x;
+	int _offset_y;
+	cv::Mat _buffer;
 
 	std::vector<Object> _proposals;
 	std::vector<Object> _objects;
