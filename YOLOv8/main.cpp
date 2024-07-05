@@ -39,9 +39,10 @@ int main(int argc, char* argv[])
 	{
 		image = cv::imread(argv[1]);
 		std::vector<Object> objects = yolo.Detect(image);
-		for (const Object& object : objects)
+		for (int i = 0; i < objects.size(); i++)
 		{
-			//object.Draw(image);
+			objects[i].Draw(image);
 		}
 	}
+	cv::imwrite("out.png", image);
 }
