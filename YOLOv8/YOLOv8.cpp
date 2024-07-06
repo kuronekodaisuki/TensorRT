@@ -4,7 +4,7 @@
 
 #include "YOLOv8.h"
 
-YOLOv8::YOLOv8()
+YOLOv8::YOLOv8(): _numClasses(80)
 {
 
 }
@@ -31,8 +31,8 @@ std::vector<Object> YOLOv8::Detect(cv::Mat image)
 {
 	preProcess(image);
 
-	doInference();
-
+	doInference("images", "output0");
+	//puts("doInferece");
 	return postProcess(_width / (float)image.cols, _height / (float)image.rows);
 }
 
@@ -43,33 +43,39 @@ void YOLOv8::preProcess(cv::Mat& image)
 
 std::vector<Object> YOLOv8::postProcess(float scaleX, float scaleY)
 {
+    //puts("postProcess");
     _proposals.clear();
     generate_proposals(scaleX, scaleY, _bbox_confidential_threshold);
 
     if (2 <= _proposals.size())
     {
         std::sort(_proposals.begin(), _proposals.end());
+
+    	std::vector<int> picked = nms(_nms_threshold);
+
+    	size_t count = picked.size();
+
+    	_objects.resize(count);
+    	for (size_t i = 0; i < count; i++)
+    	{
+            _objects[i] = _proposals[picked[i]];
+    	}
+//#ifdef _DEBUG
+    	printf("%ld %ld\n", _proposals.size(), _objects.size());
+//#endif
     }
-
-    std::vector<int> picked = nms(_nms_threshold);
-
-    size_t count = picked.size();
-
-    _objects.resize(count);
-    for (size_t i = 0; i < count; i++)
-    {
-        _objects[i] = _proposals[picked[i]];
-    }
-#ifdef _DEBUG
-    printf("%ld %ld\n", _proposals.size(), _objects.size());
-#endif
-	return _objects;
+    //else
+    //{
+	//    puts("No proposals");
+    //}
+    return _objects;
 }
 
 void YOLOv8::generate_proposals(float scaleX, float scaleY, float prob_threshold)
 {
     int channels = _output_shape[1];
     int anchors = _output_shape[2];
+    //printf("Channels:%d Anchors:%d\n", channels, anchors);
     cv::Mat output = cv::Mat(channels, anchors, CV_32F, _output);
     output = output.t();
 
@@ -85,6 +91,7 @@ void YOLOv8::generate_proposals(float scaleX, float scaleY, float prob_threshold
             _proposals.push_back(object);
         }
     }
+    //printf("%d proposals\n", _proposals.size());
 }
 
 std::vector<int> YOLOv8::nms(float nms_threshold)
