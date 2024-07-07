@@ -6,9 +6,6 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef WIN32
-#pragma warning(disable: 4819)
-#endif
 #include <NvInfer.h>
 #include <NvInferRuntime.h>
 #include <NvUffParser.h>
