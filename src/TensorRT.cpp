@@ -65,7 +65,7 @@ bool TensorRT::ConvertModel(const char* filepath, uint width, uint height, uint 
 
 void TensorRT::AllocateBuffers()
 {
-//#ifdef _DEBUG
+#ifdef _DEBUG
     for (int i = 0; i < _engine->getNbIOTensors(); i++)
     {
         const char* name = _engine->getBindingName(i);
@@ -100,7 +100,7 @@ void TensorRT::AllocateBuffers()
             printf("\t%d\n", dimension.d[j]);
         }
     }
-//#endif
+#endif
 
     auto dimensions = _engine->getBindingDimensions(1);
 #ifdef _DEBUG

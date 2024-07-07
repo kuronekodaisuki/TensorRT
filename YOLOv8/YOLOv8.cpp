@@ -4,7 +4,7 @@
 
 #include "YOLOv8.h"
 
-YOLOv8::YOLOv8(): _numClasses(80)
+YOLOv8::YOLOv8()
 {
 
 }
@@ -60,14 +60,11 @@ std::vector<Object> YOLOv8::postProcess(float scaleX, float scaleY)
     	{
             _objects[i] = _proposals[picked[i]];
     	}
-//#ifdef _DEBUG
+#ifdef _DEBUG
     	printf("%ld %ld\n", _proposals.size(), _objects.size());
-//#endif
+#endif
     }
-    //else
-    //{
-	//    puts("No proposals");
-    //}
+
     return _objects;
 }
 
