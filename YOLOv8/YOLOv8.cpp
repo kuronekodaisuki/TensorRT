@@ -36,7 +36,7 @@ int gettimeofday(struct timeval* tp, struct timezone* tzp)
     return 0;
 }
 #else
-#include <sys/utime.h>
+#include <sys/time.h>
 #endif
 static double __get_us(struct timeval t) { return (t.tv_sec * 1000000 + t.tv_usec); }
 
