@@ -6,7 +6,7 @@
 #include "../include/TensorRT.h"
 #include "../include/Object.h"
 
-
+#define NUM_CLASSES 80
 #define NMS_THRESH 0.45f
 #define BBOX_CONF_THRESH 0.25f
 
@@ -16,7 +16,7 @@ typedef struct
 	float cy;
 	float w;
 	float h;
-	float scores[80];
+	float scores[NUM_CLASSES];
 } CHANNEL;
 
 class YOLOv8 : public TensorRT
@@ -38,7 +38,7 @@ protected:
 private:
 	float _nms_threshold = NMS_THRESH;
 	float _bbox_confidential_threshold = BBOX_CONF_THRESH;
-	uint _numClasses;
+	uint _numClasses = NUM_CLASSES;
 
 	std::vector<Object> _proposals;
 	std::vector<Object> _objects;

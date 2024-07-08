@@ -2,6 +2,8 @@
 #ifndef __80_CATEGORIES_H__
 #define __80_CATEGORIES_H__
 
+#pragma warning(push)
+#pragma warning(disable: 4305)
 static const float color_list[][3] =
 {
     {0.000, 0.447, 0.741},
@@ -85,6 +87,7 @@ static const float color_list[][3] =
     {0.314, 0.717, 0.741},
     {0.50, 0.5, 0}
 };
+#pragma warning(pop)
 
 static const char* class_names[] =
 {

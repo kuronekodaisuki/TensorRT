@@ -4,6 +4,43 @@
 
 #include "YOLOv8.h"
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <stdint.h> // portable: uint64_t   MSVC: __int64 
+
+// MSVC defines this in winsock2.h!?
+typedef struct timeval {
+    long tv_sec;
+    long tv_usec;
+} timeval;
+
+int gettimeofday(struct timeval* tp, struct timezone* tzp)
+{
+    // Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
+    // This magic number is the number of 100 nanosecond intervals since January 1, 1601 (UTC)
+    // until 00:00:00 January 1, 1970 
+    static const uint64_t EPOCH = ((uint64_t)116444736000000000ULL);
+
+    SYSTEMTIME  system_time;
+    FILETIME    file_time;
+    uint64_t    time;
+
+    GetSystemTime(&system_time);
+    SystemTimeToFileTime(&system_time, &file_time);
+    time = ((uint64_t)file_time.dwLowDateTime);
+    time += ((uint64_t)file_time.dwHighDateTime) << 32;
+
+    tp->tv_sec = (long)((time - EPOCH) / 10000000L);
+    tp->tv_usec = (long)(system_time.wMilliseconds * 1000);
+    return 0;
+}
+#else
+#include <sys/time.h>
+#endif
+static double __get_us(struct timeval t) { return (t.tv_sec * 1000000 + t.tv_usec); }
+
+
 YOLOv8::YOLOv8()
 {
 
@@ -29,10 +66,16 @@ bool YOLOv8::Initialize(const char* model_path, int model_width, int model_heigh
 
 std::vector<Object> YOLOv8::Detect(cv::Mat image)
 {
+    timeval start, stop;
+    char buffer[80];
 	preProcess(image);
 
-	doInference();
-
+    gettimeofday(&start, NULL);
+	doInference("images", "output0");
+    gettimeofday(&stop, NULL);
+    sprintf(buffer, "%.2f ms", (__get_us(stop) - __get_us(start)) / 1000);
+    cv::putText(image, buffer, cv::Point(0, 10), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255, 255, 255));
+	//puts("doInferece");
 	return postProcess(_width / (float)image.cols, _height / (float)image.rows);
 }
 
@@ -43,33 +86,36 @@ void YOLOv8::preProcess(cv::Mat& image)
 
 std::vector<Object> YOLOv8::postProcess(float scaleX, float scaleY)
 {
+    //puts("postProcess");
     _proposals.clear();
     generate_proposals(scaleX, scaleY, _bbox_confidential_threshold);
 
     if (2 <= _proposals.size())
     {
         std::sort(_proposals.begin(), _proposals.end());
-    }
 
-    std::vector<int> picked = nms(_nms_threshold);
+    	std::vector<int> picked = nms(_nms_threshold);
 
-    size_t count = picked.size();
+    	size_t count = picked.size();
 
-    _objects.resize(count);
-    for (size_t i = 0; i < count; i++)
-    {
-        _objects[i] = _proposals[picked[i]];
-    }
+    	_objects.resize(count);
+    	for (size_t i = 0; i < count; i++)
+    	{
+            _objects[i] = _proposals[picked[i]];
+    	}
 #ifdef _DEBUG
-    printf("%ld %ld\n", _proposals.size(), _objects.size());
+    	printf("%ld %ld\n", _proposals.size(), _objects.size());
 #endif
-	return _objects;
+    }
+
+    return _objects;
 }
 
 void YOLOv8::generate_proposals(float scaleX, float scaleY, float prob_threshold)
 {
     int channels = _output_shape[1];
     int anchors = _output_shape[2];
+    //printf("Channels:%d Anchors:%d\n", channels, anchors);
     cv::Mat output = cv::Mat(channels, anchors, CV_32F, _output);
     output = output.t();
 
@@ -85,6 +131,7 @@ void YOLOv8::generate_proposals(float scaleX, float scaleY, float prob_threshold
             _proposals.push_back(object);
         }
     }
+    //printf("%d proposals\n", _proposals.size());
 }
 
 std::vector<int> YOLOv8::nms(float nms_threshold)
