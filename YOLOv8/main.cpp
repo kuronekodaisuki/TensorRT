@@ -37,22 +37,49 @@ int main(int argc, char* argv[])
 	}
 
 	cv::Mat image;
+	cv::VideoCapture camera;
 	if (2 <= argc)
 	{
-		image = cv::imread(argv[1]);
-		std::vector<Object> objects = yolo.Detect(image);
-		for (int i = 0; i < objects.size(); i++)
+		if (camera.open(argv[1]))
 		{
-			objects[i].Draw(image);
+			//camera.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
+			for (bool loop = true; loop;)
+			{
+				try // for prevent rtsp decode error
+				{			
+					if (camera.read(image))
+					{
+						std::vector<Object> objects = yolo.Detect(image);
+						for (int i = 0; i < objects.size(); i++)
+						{
+							objects[i].Draw(image);
+						}
+						cv::imshow("out", image);
+
+						switch (cv::waitKey(1))
+						{
+						case 'q':
+							loop = false;
+							break;
+
+						case ' ':
+							cv::imwrite("out.png", image);
+							break;
+						}
+					}
+				}
+				catch(const std::exception& e)
+				{
+					std::cerr << e.what() << '\n';
+				}
+			}
 		}
-		cv::imwrite("out.png", image);
 	}
 	else
 	{
-		cv::VideoCapture camera;
 		if (camera.open(0))
 		{
-			camera.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
+			//camera.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 			for (bool loop = true; loop && camera.read(image);)
 			{
 				std::vector<Object> objects = yolo.Detect(image);
