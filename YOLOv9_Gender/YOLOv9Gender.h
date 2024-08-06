@@ -1,4 +1,6 @@
 #pragma once
+#ifndef YOLOv9_INCLUDED
+#define YOLOv9_INCLUDED
 
 #include <opencv2/core.hpp>
 
@@ -8,8 +10,8 @@
 #define BBOX_CONF_THRESH 0.25f
 #define NUM_CLASSES 3
 
-cv::Scalar colors[NUM_CLASSES] = { cv::Scalar(255, 0, 0), cv::Scalar(0, 0, 255), cv::Scalar(255, 255, 255) };
-const char* labels[NUM_CLASSES] = {"Male", "Female", "Unknown"};
+static cv::Scalar colors[NUM_CLASSES] = { cv::Scalar(255, 0, 0), cv::Scalar(0, 0, 255), cv::Scalar(255, 255, 255) };
+static const char* labels[NUM_CLASSES] = {"Male", "Female", "Unknown"};
 
 class Object
 {
@@ -72,6 +74,7 @@ typedef struct
 
 class YOLOv9Gender : public TensorRT
 {
+public:
     bool Initialize(const char* model_path, int model_width, int model_height);
     std::vector<Object> Detect(cv::Mat image);
 
@@ -91,3 +94,4 @@ private:
     std::vector<Object> _objects;
 };
 
+#endif
