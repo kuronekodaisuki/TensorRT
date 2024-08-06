@@ -10,6 +10,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YOLOv8", "YOLOv8\YOLOv8.vcx
 		{AC061E72-C89B-4992-BF62-5F750E012B3D} = {AC061E72-C89B-4992-BF62-5F750E012B3D}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YOLOv9_Gender", "YOLOv9_Gender\YOLOv9_Gender.vcxproj", "{EBBBBEB9-5407-4FE2-AEB4-F2049F680255}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AC061E72-C89B-4992-BF62-5F750E012B3D} = {AC061E72-C89B-4992-BF62-5F750E012B3D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -24,6 +29,10 @@ Global
 		{F623145D-FE36-4728-8CB8-8A4D81059D56}.Debug|x64.Build.0 = Debug|x64
 		{F623145D-FE36-4728-8CB8-8A4D81059D56}.Release|x64.ActiveCfg = Release|x64
 		{F623145D-FE36-4728-8CB8-8A4D81059D56}.Release|x64.Build.0 = Release|x64
+		{EBBBBEB9-5407-4FE2-AEB4-F2049F680255}.Debug|x64.ActiveCfg = Debug|x64
+		{EBBBBEB9-5407-4FE2-AEB4-F2049F680255}.Debug|x64.Build.0 = Debug|x64
+		{EBBBBEB9-5407-4FE2-AEB4-F2049F680255}.Release|x64.ActiveCfg = Release|x64
+		{EBBBBEB9-5407-4FE2-AEB4-F2049F680255}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
