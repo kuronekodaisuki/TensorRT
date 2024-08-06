@@ -3,10 +3,10 @@
 #include <opencv2/opencv.hpp>
 #include "YOLOv9Gender.h"
 
-const char* MODEL = "../models/yolov8s.onnx";
-const char* ENGINE = "../models/yolov8s.engine";
+const char* MODEL = "../models/yolov9_s_gender_0200_1x3x480x640.onnx";
+const char* ENGINE = "../models/yolov9_s_gender_0200_1x3x480x640.engine";
 const int MODEL_WIDTH = 640;
-const int MODEL_HEIGHT = 640;
+const int MODEL_HEIGHT = 480;
 
 #if __cplusplus >= 201703L
 #include <filesystem>
