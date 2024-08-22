@@ -66,7 +66,7 @@ std::vector<Object> YOLOX::Detect(cv::Mat image)
     preProcess(image);
 
     gettimeofday(&start, NULL);
-    doInference("images", "output0");
+    doInference("images", "output");
     gettimeofday(&stop, NULL);
     sprintf(buffer, "%.2f ms", (__get_us(stop) - __get_us(start)) / 1000);
     cv::putText(image, buffer, cv::Point(0, 10), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255, 255, 255));
