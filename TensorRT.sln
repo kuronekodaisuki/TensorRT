@@ -16,6 +16,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YOLOv9_Gender", "YOLOv9_Gen
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YOLOX", "YOLOX\YOLOX.vcxproj", "{14D280E5-8528-4030-B590-3DA15F236055}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AC061E72-C89B-4992-BF62-5F750E012B3D} = {AC061E72-C89B-4992-BF62-5F750E012B3D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
