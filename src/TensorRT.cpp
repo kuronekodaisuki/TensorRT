@@ -143,6 +143,7 @@ bool TensorRT::LoadModel(const char* filepath, uint width, uint height, uint cha
             _builder = createInferBuilder(logger);
             _runtime = createInferRuntime(logger);
             _network = _builder->createNetworkV2(flags);
+
 #ifdef _DEBUG
             printf("Loading %s\n", filepath);
 #endif
@@ -166,6 +167,7 @@ bool TensorRT::LoadModel(const char* filepath, uint width, uint height, uint cha
                 _engine = _builder->buildEngineWithConfig(*_network, *config);
                 //_engine = _builder->buildSerializedNetwork(*_network, *config);
                 _context = _engine->createExecutionContext();
+                _builder->setMaxBatchSize(2);
 
                 AllocateBuffers();
                 return _modelLoaded = true;
