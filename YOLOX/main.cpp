@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		if (yolo.Initialize(MODEL, MODEL_WIDTH, MODEL_HEIGHT))
+		if (yolo.LoadModel(MODEL, MODEL_WIDTH, MODEL_HEIGHT))
 		{
 			yolo.SaveEngine(ENGINE);
 		}
@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
 
 	if (2 <= argc)
 	{
+		puts(argv[1]);
 		image = cv::imread(argv[1]);
 		std::vector<Object> objects = yolo.Detect(image);
 
