@@ -43,6 +43,7 @@ bool YOLOX::LoadEngine(const char* filepath, uint width, uint height, uint chann
 std::vector<Object> YOLOX::Detect(cv::Mat image)
 {
     blobFromImage(image);
+
     doInference();
 
     postProcess(_width, _height, _width / (float)image.cols, _height / (float)image.rows);
@@ -108,30 +109,6 @@ void YOLOX::blobFromImage(cv::Mat& image, bool bgr2rgb)
     }
 }
 
-
-
-std::vector<YOLOX::GridAndStride> YOLOX::generate_grids_and_stride()
-{
-    std::vector<int> strides = { 8, 16, 32 };
-
-    std::vector<GridAndStride> grid_strides;
-    for (auto stride : strides)
-    {
-        int num_grid_y = _height / stride;
-        int num_grid_x = _width / stride;
-        for (int g1 = 0; g1 < num_grid_y; g1++)
-        {
-            for (int g0 = 0; g0 < num_grid_x; g0++)
-            {
-                grid_strides.push_back(GridAndStride(g0, g1, stride));
-            }
-        }
-    }
-    _numClasses = _output_shape[2] - 5;
-
-    return grid_strides;
-}
-
 void YOLOX::generate_yolox_proposals(float prob_threshold)
 {
     const size_t num_anchors = _grid_strides.size();
@@ -173,6 +150,29 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
         } // class loop
 
     } // point anchor loop
+}
+
+
+std::vector<YOLOX::GridAndStride> YOLOX::generate_grids_and_stride()
+{
+    std::vector<int> strides = { 8, 16, 32 };
+
+    std::vector<GridAndStride> grid_strides;
+    for (auto stride : strides)
+    {
+        int num_grid_y = _height / stride;
+        int num_grid_x = _width / stride;
+        for (int g1 = 0; g1 < num_grid_y; g1++)
+        {
+            for (int g0 = 0; g0 < num_grid_x; g0++)
+            {
+                grid_strides.push_back(GridAndStride(g0, g1, stride));
+            }
+        }
+    }
+    _numClasses = _output_shape[2] - 5;
+
+    return grid_strides;
 }
 
 void YOLOX::nms_sorted_bboxes(const std::vector<Object>& objects, std::vector<int>& picked, float nms_threshold)
