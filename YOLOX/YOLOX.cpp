@@ -84,62 +84,6 @@ void YOLOX::postProcess(const int width, const int height, float scaleX, float s
     }
 }
 
-void YOLOX::DrawObjects(cv::Mat& image, const char* names[], const float colors[][3], float threshold)
-{
-    for (const Object& object : _objects)
-    {
-        if (object.prob < threshold)
-            continue;
-
-        cv::Scalar color = cv::Scalar(colors[object.label][0], colors[object.label][1], colors[object.label][2]);
-        float c_mean = (float)cv::mean(color)[0];
-        cv::Scalar txt_color;
-        if (c_mean > 0.5) {
-            txt_color = cv::Scalar(0, 0, 0);
-        }
-        else {
-            txt_color = cv::Scalar(255, 255, 255);
-        }
-
-        cv::rectangle(image, object.rect, color * 255, 2);
-
-        char text[256];
-        sprintf(text, "%s %.1f%%", names[object.label], object.prob * 100);
-
-        int baseLine = 0;
-        cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, &baseLine);
-
-        cv::Scalar txt_bk_color = color * 0.7 * 255;
-
-        int x = (int)object.rect.x;
-        int y = (int)object.rect.y + 1;
-        //int y = obj.rect.y - label_size.height - baseLine;
-        if (y > image.rows)
-            y = image.rows;
-        //if (x + label_size.width > image.cols)
-            //x = image.cols - label_size.width;
-
-        cv::rectangle(image, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
-            txt_bk_color, -1);
-
-        cv::putText(image, text, cv::Point(x, y + label_size.height),
-            cv::FONT_HERSHEY_SIMPLEX, 0.4, txt_color, 1);
-
-    }
-}
-
-
-/// <summary>
-/// Set thresholds
-/// </summary>
-/// <param name="bbox_conf_thres"></param>
-/// <param name="nms_thres"></param>
-void YOLOX::SetThresholds(float bbox_conf_thres, float nms_thres)
-{
-    _bbox_confidential_threshold = bbox_conf_thres;
-    _nms_threshold = nms_thres;
-}
-
 /// <summary>
 /// Convert image to tensor(1, channels, width, height)
 /// </summary>
@@ -163,6 +107,7 @@ void YOLOX::blobFromImage(cv::Mat& image, bool bgr2rgb)
         }
     }
 }
+
 
 
 std::vector<YOLOX::GridAndStride> YOLOX::generate_grids_and_stride()
@@ -264,5 +209,60 @@ void YOLOX::nms_sorted_bboxes(const std::vector<Object>& objects, std::vector<in
     }
 }
 
+/// <summary>
+/// Set thresholds
+/// </summary>
+/// <param name="bbox_conf_thres"></param>
+/// <param name="nms_thres"></param>
+void YOLOX::SetThresholds(float bbox_conf_thres, float nms_thres)
+{
+    _bbox_confidential_threshold = bbox_conf_thres;
+    _nms_threshold = nms_thres;
+}
 
+/*
+void YOLOX::DrawObjects(cv::Mat& image, const char* names[], const float colors[][3], float threshold)
+{
+    for (const Object& object : _objects)
+    {
+        if (object.prob < threshold)
+            continue;
+
+        cv::Scalar color = cv::Scalar(colors[object.label][0], colors[object.label][1], colors[object.label][2]);
+        float c_mean = (float)cv::mean(color)[0];
+        cv::Scalar txt_color;
+        if (c_mean > 0.5) {
+            txt_color = cv::Scalar(0, 0, 0);
+        }
+        else {
+            txt_color = cv::Scalar(255, 255, 255);
+        }
+
+        cv::rectangle(image, object.rect, color * 255, 2);
+
+        char text[256];
+        sprintf(text, "%s %.1f%%", names[object.label], object.prob * 100);
+
+        int baseLine = 0;
+        cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, &baseLine);
+
+        cv::Scalar txt_bk_color = color * 0.7 * 255;
+
+        int x = (int)object.rect.x;
+        int y = (int)object.rect.y + 1;
+        //int y = obj.rect.y - label_size.height - baseLine;
+        if (y > image.rows)
+            y = image.rows;
+        //if (x + label_size.width > image.cols)
+            //x = image.cols - label_size.width;
+
+        cv::rectangle(image, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
+            txt_bk_color, -1);
+
+        cv::putText(image, text, cv::Point(x, y + label_size.height),
+            cv::FONT_HERSHEY_SIMPLEX, 0.4, txt_color, 1);
+
+    }
+}
+*/
 

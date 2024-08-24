@@ -56,6 +56,7 @@ public:
     /// <returns>Detected objects</returns>
     std::vector<Object> Detect(cv::Mat image);
 
+    /*
     /// <summary>
     /// Draw objects with category labels and label colors
     /// </summary>
@@ -63,9 +64,11 @@ public:
     /// <param name="names">category labels</param>
     /// <param name="colors">category colors</param>
     void DrawObjects(cv::Mat& image, const char* names[], const float colors[][3], float threshold = BBOX_CONF_THRESH);
+    */
 
 protected:
     void blobFromImage(cv::Mat& image, bool bgr2rgb = true);
+    void postProcess(const int image_w, const int image_h, float scaleX, float scaleY);
 
 private:
     struct GridAndStride
@@ -85,7 +88,6 @@ private:
     std::vector<Object> _objects;
 
     std::vector<GridAndStride> _grid_strides;
-    void postProcess(const int image_w, const int image_h, float scaleX, float scaleY);
     std::vector<GridAndStride> generate_grids_and_stride();
     void generate_yolox_proposals(float prob_threshold);
     void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vector<int>& picked, float nms_threshold);
