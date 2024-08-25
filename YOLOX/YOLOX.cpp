@@ -51,6 +51,39 @@ std::vector<Object> YOLOX::Detect(cv::Mat image)
     return _objects;
 }
 
+std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int maxBatchSize, bool bgr2rgb)
+{
+    float nX = (float)image.cols / _width;
+    float nY = (float)image.rows / _height;
+    if (nX <= 1 && nY <= 1)
+    {
+        return Detect(image);
+    }
+    else
+    {
+        std::vector<cv::Point> origins;
+        origins.push_back(cv::Point(0, 0));
+        origins.push_back(cv::Point(image.cols - _width, 0));
+        for (int batch = 0; batch < maxBatchSize; batch)
+        {
+
+        }
+
+        for (uint c = 0; c < _channels; c++)
+        {
+            for (uint h = 0; h < _height; h++)
+            {
+                for (uint w = 0; w < _width; w++)
+                {
+                    _input[c * _width * _height + h * _width + w] = (float)_resized.at<cv::Vec3b>(h, w)[c];
+                }
+            }
+        }
+
+        return _objects;
+    }
+}
+
 /// <summary>
 /// Decode inference results
 /// </summary>

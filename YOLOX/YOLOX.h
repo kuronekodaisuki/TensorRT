@@ -56,6 +56,8 @@ public:
     /// <returns>Detected objects</returns>
     std::vector<Object> Detect(cv::Mat image);
 
+    std::vector<Object> DetectBatch(cv::Mat image, int maxBatchSize = 2, bool bgr2rgb = true);
+
     /*
     /// <summary>
     /// Draw objects with category labels and label colors

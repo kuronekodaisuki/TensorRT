@@ -93,6 +93,8 @@ protected:
     bool LoadONNX(const char* filepath, uint width, uint height, uint channels, PRECISION precision);
     //bool LoadUff(const char* filepath, uint width, uint height, uint channels);
 
+    void  setMaxBatchSize(int batchSize);
+
     uint _width;
     uint _height;
     uint _channels;
@@ -105,7 +107,7 @@ protected:
     bool _modelLoaded;
     int _output_size;
 
-    virtual void AllocateBuffers();
+    virtual void AllocateBuffers(int batchSize = 1);
     virtual void FreeBuffers();
 
     nvinfer1::IBlobNameToTensor* _blogToTensor = nullptr;

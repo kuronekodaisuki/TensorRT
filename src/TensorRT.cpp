@@ -60,7 +60,7 @@ bool TensorRT::ConvertModel(const char* filepath, uint width, uint height, uint 
     return false;   
 }
 
-void TensorRT::AllocateBuffers()
+void TensorRT::AllocateBuffers(int batchSize)
 {
 #ifdef _DEBUG
     for (int i = 0; i < _engine->getNbIOTensors(); i++)
@@ -112,8 +112,8 @@ void TensorRT::AllocateBuffers()
         printf("%d size:%d\n", j, dimensions.d[j]);
 #endif
     }
-    _output = new float[_output_size];
-    _input = new float[_width * _height * _channels];
+    _output = new float[_output_size * batchSize];
+    _input = new float[_width * _height * _channels * batchSize];
     _resized.create(_height, _width, CV_8UC3);
 
 }
@@ -123,6 +123,11 @@ void TensorRT::FreeBuffers()
     _resized.release();
     delete _input;
     delete _output;
+}
+
+void  TensorRT::setMaxBatchSize(int batchSize)
+{
+    return _builder->setMaxBatchSize(batchSize);
 }
 
 bool TensorRT::LoadModel(const char* filepath, uint width, uint height, uint channels, PRECISION precision)
