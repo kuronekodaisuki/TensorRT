@@ -105,6 +105,7 @@ protected:
 
 protected:
     bool _modelLoaded;
+    int _input_size;
     int _output_size;
 
     virtual void AllocateBuffers(int batchSize = 1);

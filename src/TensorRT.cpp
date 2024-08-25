@@ -112,10 +112,11 @@ void TensorRT::AllocateBuffers(int batchSize)
         printf("%d size:%d\n", j, dimensions.d[j]);
 #endif
     }
-    _output = new float[_output_size * batchSize];
-    _input = new float[_width * _height * _channels * batchSize];
+    _output_size *= batchSize;
+    _input_size = _width * _height * _channels * batchSize;
+    _output = new float[_output_size];
+    _input = new float[_input_size];
     _resized.create(_height, _width, CV_8UC3);
-
 }
 
 void TensorRT::FreeBuffers()
@@ -328,13 +329,6 @@ void TensorRT::blobFromImage(cv::Mat& image, bool bgr2rgb)
     }
 }
 
-/*
-void TensorRT::ShowResized(const char* title)
-{
-	cv::imshow(title, _resized);
-}
-*/
-
 /// <summary>
 /// Convert image from tensor(1, channels, width, height)
 /// </summary>
@@ -391,7 +385,7 @@ void TensorRT::doInference(const char* inputBlobName, const char* outputBlobName
     assert(_engine->getTensorDataType(outputBlobName) == DataType::kFLOAT);
 
     // Create GPU buffers on device
-    CHECK(cudaMalloc(&buffers[input], _channels * _height * _width * sizeof(float)));
+    CHECK(cudaMalloc(&buffers[input], _input_size * sizeof(float)));
     CHECK(cudaMalloc(&buffers[output], _output_size * sizeof(float)));
 
     // Create stream
@@ -399,7 +393,7 @@ void TensorRT::doInference(const char* inputBlobName, const char* outputBlobName
     CHECK(cudaStreamCreate(&stream));
 
     // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
-    CHECK(cudaMemcpyAsync(buffers[input], _input, _channels * _height * _width * sizeof(float), cudaMemcpyHostToDevice, stream));
+    CHECK(cudaMemcpyAsync(buffers[input], _input, _input_size * sizeof(float), cudaMemcpyHostToDevice, stream));
     
     (_context->enqueueV2(buffers, stream, nullptr));
 
