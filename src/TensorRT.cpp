@@ -26,7 +26,7 @@ Logger logger;
 /// <summary>
 /// Constructor
 /// </summary>
-TensorRT::TensorRT()
+TensorRT::TensorRT(int batch_size): _batch_size(batch_size)
 {
     _modelLoaded = false;
     cudaSetDevice(0);
@@ -60,7 +60,7 @@ bool TensorRT::ConvertModel(const char* filepath, uint width, uint height, uint 
     return false;   
 }
 
-void TensorRT::AllocateBuffers(int batchSize)
+void TensorRT::AllocateBuffers()
 {
 #ifdef _DEBUG
     for (int i = 0; i < _engine->getNbIOTensors(); i++)
@@ -112,10 +112,9 @@ void TensorRT::AllocateBuffers(int batchSize)
         printf("%d size:%d\n", j, dimensions.d[j]);
 #endif
     }
-    _output_size *= batchSize;
-    _input_size = _width * _height * _channels * batchSize;
-    _output = new float[_output_size];
-    _input = new float[_input_size];
+    _input_size = _width * _height * _channels;
+    _output = new float[_output_size * _batch_size];
+    _input = new float[_input_size * _batch_size];
     _resized.create(_height, _width, CV_8UC3);
 }
 
@@ -385,19 +384,19 @@ void TensorRT::doInference(const char* inputBlobName, const char* outputBlobName
     assert(_engine->getTensorDataType(outputBlobName) == DataType::kFLOAT);
 
     // Create GPU buffers on device
-    CHECK(cudaMalloc(&buffers[input], _input_size * sizeof(float)));
-    CHECK(cudaMalloc(&buffers[output], _output_size * sizeof(float)));
+    CHECK(cudaMalloc(&buffers[input], _input_size * _batch_size * sizeof(float)));
+    CHECK(cudaMalloc(&buffers[output], _output_size * _batch_size * sizeof(float)));
 
     // Create stream
     cudaStream_t stream;
     CHECK(cudaStreamCreate(&stream));
 
     // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
-    CHECK(cudaMemcpyAsync(buffers[input], _input, _input_size * sizeof(float), cudaMemcpyHostToDevice, stream));
+    CHECK(cudaMemcpyAsync(buffers[input], _input, _input_size * _batch_size * sizeof(float), cudaMemcpyHostToDevice, stream));
     
     (_context->enqueueV2(buffers, stream, nullptr));
 
-    CHECK(cudaMemcpyAsync(_output, buffers[output], _output_size * sizeof(float), cudaMemcpyDeviceToHost, stream));
+    CHECK(cudaMemcpyAsync(_output, buffers[output], _output_size * _batch_size * sizeof(float), cudaMemcpyDeviceToHost, stream));
     cudaStreamSynchronize(stream);
 
     // Release stream and buffers

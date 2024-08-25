@@ -18,7 +18,7 @@ public:
 
     bool Send(std::ostream& stream);
 
-    void Draw(cv::Mat& image)
+    void Draw(cv::Mat& image, int offsetX = 0, int offsetY = 0)
     {
         cv::Scalar color = cv::Scalar((uint)(color_list[label][0] * 255), (uint)(color_list[label][1] * 255), (uint)(color_list[label][2] * 255));
         float c_mean = (float)cv::mean(color)[0];
@@ -31,7 +31,8 @@ public:
             txt_color = cv::Scalar(255, 255, 255);
         }
 
-        cv::rectangle(image, rect, color * 255, 2);
+        cv::Rect bbox(rect.x + offsetX, rect.y + offsetY, rect.width, rect.height);
+        cv::rectangle(image, bbox, color * 255, 2);
 
         char text[256];
         sprintf(text, "%s %.1f%%", class_names[label], prob * 100);
@@ -41,9 +42,9 @@ public:
 
         cv::Scalar txt_bk_color = color * 0.7 * 255;
 
-        int x = (int)rect.x;
-        int y = (int)rect.y;
-        //int y = obj.rect.y - label_size.height - baseLine;
+        int x = (int)bbox.x;
+        int y = (int)bbox.y;
+        //int y = obj.bbox.y - label_size.height - baseLine;
         if (y > image.rows)
             y = image.rows;
         //if (x + label_size.width > image.cols)

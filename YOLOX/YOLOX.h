@@ -18,7 +18,7 @@ public:
     /// <summary>
     /// Constructor
     /// </summary>
-    YOLOX();
+    YOLOX(int batch_size = 1);
     ~YOLOX();
 
     /// <summary>
@@ -60,7 +60,8 @@ public:
 
 protected:
     void blobFromImage(cv::Mat& image, bool bgr2rgb = true);
-    void postProcess(const int image_w, const int image_h, float scaleX, float scaleY);
+    std::vector<Object> postProcess(const int image_w, const int image_h, float scaleX, float scaleY, float* output);
+    void generate_yolox_proposals(float prob_threshold, float* output);
 
 private:
     struct GridAndStride
@@ -81,7 +82,7 @@ private:
 
     std::vector<GridAndStride> _grid_strides;
     std::vector<GridAndStride> generate_grids_and_stride();
-    void generate_yolox_proposals(float prob_threshold);
+
     void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vector<int>& picked, float nms_threshold);
 };
 #endif // __YOLOX_H__

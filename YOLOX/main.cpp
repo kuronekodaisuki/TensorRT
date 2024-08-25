@@ -26,7 +26,7 @@ bool FileExists(const char* name)
 int main(int argc, char* argv[])
 {
 	cv::Mat image;
-	YOLOX yolo;
+	YOLOX yolo(2);
 	if (FileExists(ENGINE))
 	{
 		yolo.LoadEngine(ENGINE, MODEL_WIDTH, MODEL_HEIGHT);
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 	{
 		puts(argv[1]);
 		image = cv::imread(argv[1]);
-		std::vector<Object> objects = yolo.Detect(image);
+		std::vector<Object> objects = yolo.DetectBatch(image);
 
 		for (int i = 0; i < objects.size(); i++)
 		{

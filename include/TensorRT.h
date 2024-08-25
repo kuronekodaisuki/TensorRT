@@ -48,7 +48,7 @@ namespace nvonnxparser
 class API TensorRT
 {
 public:
-    TensorRT();
+    TensorRT(int batch_size = 1);
     ~TensorRT();
 
     enum PRECISION {
@@ -105,10 +105,11 @@ protected:
 
 protected:
     bool _modelLoaded;
+    int _batch_size;
     int _input_size;
     int _output_size;
 
-    virtual void AllocateBuffers(int batchSize = 1);
+    virtual void AllocateBuffers();
     virtual void FreeBuffers();
 
     nvinfer1::IBlobNameToTensor* _blogToTensor = nullptr;

@@ -4,7 +4,7 @@
 #define INPUT_BLOB_NAME "images"
 #define OUTPUT_BLOB_NAME "output"
 
-YOLOX::YOLOX()
+YOLOX::YOLOX(int batch_size): TensorRT(batch_size)
 {
 }
 
@@ -46,14 +46,12 @@ std::vector<Object> YOLOX::Detect(cv::Mat image)
 
     doInference();
 
-    postProcess(_width, _height, _width / (float)image.cols, _height / (float)image.rows);
-
-    return _objects;
+    return _objects = postProcess(_width, _height, _width / (float)image.cols, _height / (float)image.rows, _output);
 }
 
-std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int maxBatchSize, bool bgr2rgb)
+std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int batch_size, bool bgr2rgb)
 {
-    setMaxBatchSize(maxBatchSize);
+    //setMaxBatchSize(maxBatchSize);
     float nX = (float)image.cols / _width;
     float nY = (float)image.rows / _height;
     if (nX <= 1 && nY <= 1)
@@ -67,7 +65,7 @@ std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int maxBatchSize, bool bgr
         rois.push_back(cv::Rect(image.cols - _width, 0, _width, _height));
 
         float* input = _input;
-        for (int batch = 0; batch < maxBatchSize; batch)
+        for (int batch = 0; batch < batch_size; batch++)
         {
             cv::Mat roi(image, rois[batch]);
             if (bgr2rgb)
@@ -78,6 +76,7 @@ std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int maxBatchSize, bool bgr
             {
                 roi.copyTo(_resized);
             }
+            cv::imwrite("resized.png", _resized);
 
             for (uint c = 0; c < _channels; c++)
             {
@@ -94,9 +93,15 @@ std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int maxBatchSize, bool bgr
 
         doInference();
 
-        for (int batch = 0; batch < maxBatchSize; batch)
+        float* output = _output;
+        for (int batch = 0; batch < batch_size; batch++)
         {
-            float* output = _output;
+            std::vector<Object> objects = postProcess(_width, _height, 1, 1, output);
+            for (int i = 0; i < objects.size(); i++)
+            {
+                objects[i].Draw(image, rois[batch].x, rois[batch].y);
+            }
+            output += _output_size;
         }
 
         return _objects;
@@ -136,10 +141,11 @@ void YOLOX::blobFromImage(cv::Mat& image, bool bgr2rgb)
 /// <param name="scale"></param>
 /// <param name="image_w">Width of input image</param>
 /// <param name="image_h">Height of input image</param>
-void YOLOX::postProcess(const int width, const int height, float scaleX, float scaleY)
+std::vector<Object> YOLOX::postProcess(const int width, const int height, float scaleX, float scaleY, float* output)
 {
+    std::vector<Object> objects;
     _proposals.clear();
-    generate_yolox_proposals(_bbox_confidential_threshold);
+    generate_yolox_proposals(_bbox_confidential_threshold, output);
 
     if (2 <= _proposals.size())
     {
@@ -151,19 +157,20 @@ void YOLOX::postProcess(const int width, const int height, float scaleX, float s
 
     size_t count = picked.size();
 
-    _objects.resize(count);
+    objects.resize(count);
     for (size_t i = 0; i < count; i++)
     {
-        _objects[i] = _proposals[picked[i]];
+        objects[i] = _proposals[picked[i]];
 
-        _objects[i].rect.x /= scaleX;
-        _objects[i].rect.y /= scaleY;
-        _objects[i].rect.width /= scaleX;
-        _objects[i].rect.height /= scaleY;
+        objects[i].rect.x /= scaleX;
+        objects[i].rect.y /= scaleY;
+        objects[i].rect.width /= scaleX;
+        objects[i].rect.height /= scaleY;
     }
+    return objects;
 }
 
-void YOLOX::generate_yolox_proposals(float prob_threshold)
+void YOLOX::generate_yolox_proposals(float prob_threshold, float* output)
 {
     const size_t num_anchors = _grid_strides.size();
 
@@ -176,11 +183,11 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
         const size_t offset = anchor_idx * (_numClasses + 5);
 
         // yolox/models/yolo_head.py decode logic
-        float x_center = (_output[offset + 0] + grid0) * stride;
-        float y_center = (_output[offset + 1] + grid1) * stride;
-        float w = exp(_output[offset + 2]) * stride;
-        float h = exp(_output[offset + 3]) * stride;
-        float box_objectness = _output[offset + 4];
+        float x_center = (output[offset + 0] + grid0) * stride;
+        float y_center = (output[offset + 1] + grid1) * stride;
+        float w = exp(output[offset + 2]) * stride;
+        float h = exp(output[offset + 3]) * stride;
+        float box_objectness = output[offset + 4];
 
         float x0 = x_center - w / 2;
         float y0 = y_center - h / 2;
@@ -189,7 +196,7 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
 
         for (size_t class_idx = 0; class_idx < _numClasses; class_idx++)
         {
-            float box_cls_score = _output[offset + 5 + class_idx];
+            float box_cls_score = output[offset + 5 + class_idx];
             float box_prob = box_objectness * box_cls_score;
             if (prob_threshold < box_prob)
             {
