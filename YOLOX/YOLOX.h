@@ -58,16 +58,6 @@ public:
 
     std::vector<Object> DetectBatch(cv::Mat image, int maxBatchSize = 2, bool bgr2rgb = true);
 
-    /*
-    /// <summary>
-    /// Draw objects with category labels and label colors
-    /// </summary>
-    /// <param name="image"></param>
-    /// <param name="names">category labels</param>
-    /// <param name="colors">category colors</param>
-    void DrawObjects(cv::Mat& image, const char* names[], const float colors[][3], float threshold = BBOX_CONF_THRESH);
-    */
-
 protected:
     void blobFromImage(cv::Mat& image, bool bgr2rgb = true);
     void postProcess(const int image_w, const int image_h, float scaleX, float scaleY);

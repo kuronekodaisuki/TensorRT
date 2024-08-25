@@ -53,6 +53,7 @@ std::vector<Object> YOLOX::Detect(cv::Mat image)
 
 std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int maxBatchSize, bool bgr2rgb)
 {
+    setMaxBatchSize(maxBatchSize);
     float nX = (float)image.cols / _width;
     float nY = (float)image.rows / _height;
     if (nX <= 1 && nY <= 1)
@@ -61,26 +62,70 @@ std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int maxBatchSize, bool bgr
     }
     else
     {
-        std::vector<cv::Point> origins;
-        origins.push_back(cv::Point(0, 0));
-        origins.push_back(cv::Point(image.cols - _width, 0));
+        std::vector<cv::Rect> rois;
+        rois.push_back(cv::Rect(0, 0, _width, _height));
+        rois.push_back(cv::Rect(image.cols - _width, 0, _width, _height));
+
+        float* input = _input;
         for (int batch = 0; batch < maxBatchSize; batch)
         {
-
-        }
-
-        for (uint c = 0; c < _channels; c++)
-        {
-            for (uint h = 0; h < _height; h++)
+            cv::Mat roi(image, rois[batch]);
+            if (bgr2rgb)
             {
-                for (uint w = 0; w < _width; w++)
+                cv::cvtColor(roi, _resized, cv::COLOR_BGR2RGB);
+            }
+            else
+            {
+                roi.copyTo(_resized);
+            }
+
+            for (uint c = 0; c < _channels; c++)
+            {
+                for (uint h = 0; h < _height; h++)
                 {
-                    _input[c * _width * _height + h * _width + w] = (float)_resized.at<cv::Vec3b>(h, w)[c];
+                    for (uint w = 0; w < _width; w++)
+                    {
+                        input[h * _width + w] = (float)_resized.at<cv::Vec3b>(h, w)[c];
+                    }
                 }
+                input += _width * _height;
             }
         }
 
+        doInference();
+
+        for (int batch = 0; batch < maxBatchSize; batch)
+        {
+            float* output = _output;
+        }
+
         return _objects;
+    }
+}
+
+/// <summary>
+/// Convert image to tensor(1, channels, width, height)
+/// </summary>
+/// <param name="image"></param>
+void YOLOX::blobFromImage(cv::Mat& image, bool bgr2rgb)
+{
+    cv::resize(image, _resized, cv::Size(_width, _height));
+    if (bgr2rgb)
+    {
+        cv::cvtColor(_resized, _resized, cv::COLOR_BGR2RGB);
+    }
+
+    float* input = _input;
+    for (uint c = 0; c < _channels; c++)
+    {
+        for (uint h = 0; h < _height; h++)
+        {
+            for (uint w = 0; w < _width; w++)
+            {
+                input[h * _width + w] = (float)_resized.at<cv::Vec3b>(h, w)[c];
+            }
+        }
+        input += _width * _height;
     }
 }
 
@@ -115,30 +160,6 @@ void YOLOX::postProcess(const int width, const int height, float scaleX, float s
         _objects[i].rect.y /= scaleY;
         _objects[i].rect.width /= scaleX;
         _objects[i].rect.height /= scaleY;
-    }
-}
-
-/// <summary>
-/// Convert image to tensor(1, channels, width, height)
-/// </summary>
-/// <param name="image"></param>
-void YOLOX::blobFromImage(cv::Mat& image, bool bgr2rgb)
-{
-    cv::resize(image, _resized, cv::Size(_width, _height));
-    if (bgr2rgb)
-    {
-        cv::cvtColor(_resized, _resized, cv::COLOR_BGR2RGB);
-    }
-
-    for (uint c = 0; c < _channels; c++)
-    {
-        for (uint h = 0; h < _height; h++)
-        {
-            for (uint w = 0; w < _width; w++)
-            {
-                _input[c * _width * _height + h * _width + w] = (float)_resized.at<cv::Vec3b>(h, w)[c];
-            }
-        }
     }
 }
 
@@ -184,7 +205,6 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
 
     } // point anchor loop
 }
-
 
 std::vector<YOLOX::GridAndStride> YOLOX::generate_grids_and_stride()
 {
@@ -252,50 +272,4 @@ void YOLOX::SetThresholds(float bbox_conf_thres, float nms_thres)
     _bbox_confidential_threshold = bbox_conf_thres;
     _nms_threshold = nms_thres;
 }
-
-/*
-void YOLOX::DrawObjects(cv::Mat& image, const char* names[], const float colors[][3], float threshold)
-{
-    for (const Object& object : _objects)
-    {
-        if (object.prob < threshold)
-            continue;
-
-        cv::Scalar color = cv::Scalar(colors[object.label][0], colors[object.label][1], colors[object.label][2]);
-        float c_mean = (float)cv::mean(color)[0];
-        cv::Scalar txt_color;
-        if (c_mean > 0.5) {
-            txt_color = cv::Scalar(0, 0, 0);
-        }
-        else {
-            txt_color = cv::Scalar(255, 255, 255);
-        }
-
-        cv::rectangle(image, object.rect, color * 255, 2);
-
-        char text[256];
-        sprintf(text, "%s %.1f%%", names[object.label], object.prob * 100);
-
-        int baseLine = 0;
-        cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, &baseLine);
-
-        cv::Scalar txt_bk_color = color * 0.7 * 255;
-
-        int x = (int)object.rect.x;
-        int y = (int)object.rect.y + 1;
-        //int y = obj.rect.y - label_size.height - baseLine;
-        if (y > image.rows)
-            y = image.rows;
-        //if (x + label_size.width > image.cols)
-            //x = image.cols - label_size.width;
-
-        cv::rectangle(image, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
-            txt_bk_color, -1);
-
-        cv::putText(image, text, cv::Point(x, y + label_size.height),
-            cv::FONT_HERSHEY_SIMPLEX, 0.4, txt_color, 1);
-
-    }
-}
-*/
 
