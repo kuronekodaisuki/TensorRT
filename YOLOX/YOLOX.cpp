@@ -51,7 +51,7 @@ std::vector<Object> YOLOX::Detect(cv::Mat image)
 
 std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int batch_size, bool bgr2rgb)
 {
-    //setMaxBatchSize(maxBatchSize);
+    setMaxBatchSize(batch_size);
     float nX = (float)image.cols / _width;
     float nY = (float)image.rows / _height;
     if (nX <= 1 && nY <= 1)
@@ -63,6 +63,8 @@ std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int batch_size, bool bgr2r
         std::vector<cv::Rect> rois;
         rois.push_back(cv::Rect(0, 0, _width, _height));
         rois.push_back(cv::Rect(image.cols - _width, 0, _width, _height));
+        rois.push_back(cv::Rect(0, image.rows - _height, _width, _height));
+        rois.push_back(cv::Rect(image.cols - _width, image.rows - _height, _width, _height));
 
         float* input = _input;
         for (int batch = 0; batch < batch_size; batch++)
@@ -76,7 +78,6 @@ std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int batch_size, bool bgr2r
             {
                 roi.copyTo(_resized);
             }
-            cv::imwrite("resized.png", _resized);
 
             for (uint c = 0; c < _channels; c++)
             {
@@ -96,11 +97,15 @@ std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int batch_size, bool bgr2r
         float* output = _output;
         for (int batch = 0; batch < batch_size; batch++)
         {
+            char buffer[60];
             std::vector<Object> objects = postProcess(_width, _height, 1, 1, output);
+            printf("batch:%d %ld objects\n", batch, objects.size());
             for (int i = 0; i < objects.size(); i++)
             {
                 objects[i].Draw(image, rois[batch].x, rois[batch].y);
             }
+            sprintf(buffer, "batch%d.png", batch);
+            cv::imwrite(buffer, image);
             output += _output_size;
         }
 
