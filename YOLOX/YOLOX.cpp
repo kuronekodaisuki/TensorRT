@@ -4,7 +4,7 @@
 #define INPUT_BLOB_NAME "images"
 #define OUTPUT_BLOB_NAME "output"
 
-YOLOX::YOLOX(int batch_size): TensorRT(batch_size)
+YOLOX::YOLOX(int batch_size): TensorRT(INPUT_BLOB_NAME, OUTPUT_BLOB_NAME, batch_size)
 {
 }
 
@@ -44,9 +44,9 @@ std::vector<Object> YOLOX::Detect(cv::Mat image)
 {
     blobFromImage(image);
 
-    doInference(INPUT_BLOB_NAME, OUTPUT_BLOB_NAME);
+    doInference();
 
-    return _objects = postProcess(_width, _height, _width / (float)image.cols, _height / (float)image.rows, _output);
+    return _objects = postProcess(_width, _height, _width / (float)image.cols, _height / (float)image.rows, _output_buffer);
 }
 
 std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int batch_size, bool bgr2rgb)
@@ -66,7 +66,7 @@ std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int batch_size, bool bgr2r
         rois.push_back(cv::Rect(0, image.rows - _height, _width, _height));
         rois.push_back(cv::Rect(image.cols - _width, image.rows - _height, _width, _height));
 
-        float* input = _input;
+        float* input = _input_buffer;
         for (int batch = 0; batch < batch_size; batch++)
         {
             cv::Mat roi(image, rois[batch]);
@@ -94,7 +94,7 @@ std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int batch_size, bool bgr2r
 
         doInference();
 
-        float* output = _output;
+        float* output = _output_buffer;
         for (int batch = 0; batch < batch_size; batch++)
         {
             char buffer[60];
@@ -125,7 +125,7 @@ void YOLOX::blobFromImage(cv::Mat& image, bool bgr2rgb)
         cv::cvtColor(_resized, _resized, cv::COLOR_BGR2RGB);
     }
 
-    float* input = _input;
+    float* input = _input_buffer;
     for (uint c = 0; c < _channels; c++)
     {
         for (uint h = 0; h < _height; h++)

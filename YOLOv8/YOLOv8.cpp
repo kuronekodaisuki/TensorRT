@@ -116,7 +116,7 @@ void YOLOv8::generate_proposals(float scaleX, float scaleY, float prob_threshold
     int channels = _output_shape[1];
     int anchors = _output_shape[2];
     //printf("Channels:%d Anchors:%d\n", channels, anchors);
-    cv::Mat output = cv::Mat(channels, anchors, CV_32F, _output);
+    cv::Mat output = cv::Mat(channels, anchors, CV_32F, _output_buffer);
     output = output.t();
 
     for (int i = 0; i < anchors; i++)
