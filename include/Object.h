@@ -31,7 +31,7 @@ public:
             txt_color = cv::Scalar(255, 255, 255);
         }
 
-        cv::Rect bbox(rect.x + offsetX, rect.y + offsetY, rect.width, rect.height);
+        cv::Rect bbox((int)rect.x + offsetX, (int)rect.y + offsetY, (int)rect.width, (int)rect.height);
         cv::rectangle(image, bbox, color * 255, 2);
 
         char text[256];
