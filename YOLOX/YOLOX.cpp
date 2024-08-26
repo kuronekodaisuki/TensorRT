@@ -99,7 +99,7 @@ std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int batch_size, bool bgr2r
         {
             char buffer[60];
             std::vector<Object> objects = postProcess(_width, _height, 1, 1, output);
-            printf("batch:%d %ld objects\n", batch, objects.size());
+            printf("batch:%d %d objects\n", batch, objects.size());
             for (int i = 0; i < objects.size(); i++)
             {
                 objects[i].Draw(image, rois[batch].x, rois[batch].y);
