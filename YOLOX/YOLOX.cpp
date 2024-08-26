@@ -44,7 +44,7 @@ std::vector<Object> YOLOX::Detect(cv::Mat image)
 {
     blobFromImage(image);
 
-    doInference();
+    doInference(INPUT_BLOB_NAME, OUTPUT_BLOB_NAME);
 
     return _objects = postProcess(_width, _height, _width / (float)image.cols, _height / (float)image.rows, _output);
 }

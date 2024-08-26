@@ -216,7 +216,7 @@ bool TensorRT::LoadEngine(const char* filepath, uint width, uint height, uint ch
 
     if (_engine != nullptr)
     {
-        auto dimensions = _engine->getBindingDimensions(1);
+        //auto dimensions = _engine->getBindingDimensions(1);
 
         AllocateBuffers();
 
