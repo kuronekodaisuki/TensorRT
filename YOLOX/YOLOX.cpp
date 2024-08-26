@@ -51,7 +51,7 @@ std::vector<Object> YOLOX::Detect(cv::Mat image)
 
 std::vector<Object> YOLOX::DetectBatch(cv::Mat image, int batch_size, bool bgr2rgb)
 {
-    setMaxBatchSize(batch_size);
+    //setMaxBatchSize(batch_size);
     float nX = (float)image.cols / _width;
     float nY = (float)image.rows / _height;
     if (nX <= 1 && nY <= 1)
