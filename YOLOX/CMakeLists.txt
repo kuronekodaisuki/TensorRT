@@ -19,6 +19,7 @@ add_executable(YOLOX
 
 find_package(CUDA REQUIRED)
 find_package(OpenCV REQUIRED)
+#find_package(TENSORRT REQUIRED)
 #find_package(PkgConfig)
 
 

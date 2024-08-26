@@ -8,7 +8,6 @@
 
 #include <NvInfer.h>
 #include <NvInferRuntime.h>
-#include <NvUffParser.h>
 #include <NvOnnxConfig.h>
 #include <NvOnnxParser.h>
 #include <cuda_runtime_api.h>
@@ -231,36 +230,6 @@ void TensorRT::SaveEngine(const char* filepath)
     file.write((const char*)memory->data(), memory->size());
     file.close();
 }
-
-/*
-bool TensorRT::LoadUff(const char* filepath, uint width, uint height, uint channels)
-{
-    int verbosity = 4;
-    NetworkDefinitionCreationFlags flags = 1;
-
-    _width = width;
-    _height = height;
-    _channels = channels;
-
-    // Create Instances
-    _builder = createInferBuilder(logger);
-    _runtime = createInferRuntime(logger);
-    _network = _builder->createNetworkV2(flags);
-    nvuffparser::IUffParser* parser = nvuffparser::createUffParser();
-    if (parser->parse(filepath, *_network))
-    {
-        IBuilderConfig* config = _builder->createBuilderConfig();
-
-        _engine = _builder->buildEngineWithConfig(*_network, *config);
-        _context = _engine->createExecutionContext();
-
-        AllocateBuffers();
-
-        return _modelLoaded = true;
-    }
-    return false;
-}
-*/
 
 bool TensorRT::LoadONNX(const char* filepath, uint width, uint height, uint channels, PRECISION precision)
 {
