@@ -142,7 +142,7 @@ void TensorRT::FreeBuffers()
 
 void  TensorRT::setMaxBatchSize(int batchSize)
 {
-    return _builder->setMaxBatchSize(batchSize);
+    //return _builder->setMaxBatchSize(batchSize);
 }
 
 bool TensorRT::LoadModel(const char* filepath, uint width, uint height, uint channels, PRECISION precision)
