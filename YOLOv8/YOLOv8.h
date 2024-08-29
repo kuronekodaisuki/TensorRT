@@ -22,7 +22,7 @@ typedef struct
 class YOLOv8 : public TensorRT
 {
 public:
-	YOLOv8();
+	YOLOv8(const char* input = "images", const char* output = "output0", int batch_size = 1);
 	~YOLOv8();
 
 	bool Initialize(const char* model_path, int model_width, int model_height);
