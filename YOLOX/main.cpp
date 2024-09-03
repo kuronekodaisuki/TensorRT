@@ -1,13 +1,15 @@
 ﻿// YOLOX.cpp : このファイルには 'main' 関数が含まれています。プログラム実行の開始と終了がそこで行われます。
 //
 #include <opencv2/opencv.hpp>
+#include <chrono>
+
 #include "YOLOX.h"
 #include "../include/Object.h"
 
-const char* MODEL = "../models/yolox_m_736x1280.onnx";
-const char* ENGINE = "../models/yolox_m_736x1280.trt";
-const int MODEL_WIDTH = 1280;
-const int MODEL_HEIGHT = 736;
+const char* MODEL = "../models/yolox_m_1088x1920.onnx";
+const char* ENGINE = "../models/yolox_m_188x1920.trt";
+const int MODEL_WIDTH = 1920;
+const int MODEL_HEIGHT = 1088;
 
 
 #if __cplusplus >= 201703L
@@ -43,7 +45,16 @@ int main(int argc, char* argv[])
 	{
 		puts(argv[1]);
 		image = cv::imread(argv[1]);
+		std::chrono::high_resolution_clock clock;
+		std::chrono::steady_clock::time_point start, stop;
+
+		start = clock.now();
 		std::vector<Object> objects = yolo.Detect(image);
+		stop = clock.now();
+
+		printf("Finish %.2f ms to perform YOLOX\n",
+			std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start).count() * 1.0e-6
+		);
 
 		for (int i = 0; i < objects.size(); i++)
 		{
