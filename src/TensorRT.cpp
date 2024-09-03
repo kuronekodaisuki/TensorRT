@@ -25,7 +25,7 @@ Logger logger;
 /// <summary>
 /// Constructor
 /// </summary>
-TensorRT::TensorRT()
+TensorRT::TensorRT(const char* input, const char* output) : _input_name(input), _output_name(output), _input(0), _output(1), _input_buffer(nullptr), _output_buffer(nullptr)
 {
     _modelLoaded = false;
     cudaSetDevice(0);
@@ -61,6 +61,23 @@ bool TensorRT::ConvertModel(const char* filepath, uint width, uint height, uint 
 
 void TensorRT::AllocateBuffers()
 {
+    if (_input_name != nullptr)
+    {
+        _input = _engine->getBindingIndex(_input_name);
+    }
+    else
+    {
+        _input_name = _engine->getBindingName(_input);
+    }
+    if (_output_name != nullptr)
+    {
+        _output = _engine->getBindingIndex(_output_name);
+    }
+    else
+    {
+        _output_name = _engine->getBindingName(_output);
+    }
+
 #ifdef _DEBUG
     for (int i = 0; i < _engine->getNbIOTensors(); i++)
     {
@@ -111,8 +128,8 @@ void TensorRT::AllocateBuffers()
         printf("%d size:%d\n", j, dimensions.d[j]);
 #endif
     }
-    _output = new float[_output_size];
-    _input = new float[_width * _height * _channels];
+    _output_buffer = new float[_output_size];
+    _input_buffer = new float[_width * _height * _channels];
     _resized.create(_height, _width, CV_8UC3);
 
 }
@@ -120,8 +137,8 @@ void TensorRT::AllocateBuffers()
 void TensorRT::FreeBuffers()
 {
     _resized.release();
-    delete _input;
-    delete _output;
+    delete[] _input_buffer;
+    delete[] _output_buffer;
 }
 
 bool TensorRT::LoadModel(const char* filepath, uint width, uint height, uint channels, PRECISION precision)
@@ -286,7 +303,7 @@ void TensorRT::blobFromImage(cv::Mat& image, bool bgr2rgb)
         {
             for (uint w = 0; w < _width; w++)
             {
-                _input[c * _width * _height + h * _width + w] = (float)_resized.at<cv::Vec3b>(h, w)[c] / 255;
+                _input_buffer[c * _width * _height + h * _width + w] = (float)_resized.at<cv::Vec3b>(h, w)[c] / 255;
             }
         }
     }
@@ -312,7 +329,7 @@ void TensorRT::imageFromBlob(cv::Mat& image, bool rgb2bgr)
         {
             for (uint w = 0; w < _width; w++)
             {
-                image.at<cv::Vec3b>(h, w)[c] = cv::saturate_cast<uchar>(_output[c * _width * _height + h * _width + w] * 255);
+                image.at<cv::Vec3b>(h, w)[c] = cv::saturate_cast<uchar>(_output_buffer[c * _width * _height + h * _width + w] * 255);
             }
         }
     }
@@ -323,51 +340,28 @@ void TensorRT::imageFromBlob(cv::Mat& image, bool rgb2bgr)
 /// <summary>
 /// Inference
 /// </summary>
-/// <param name="context"></param>
-/// <param name="input"></param>
-/// <param name="output"></param>
-/// <param name="input_shape"></param>
-void TensorRT::doInference(const char* inputBlobName, const char* outputBlobName)
+void TensorRT::doInference()
 {
     assert(_engine->getNbBindings() >= 2);
     void* buffers[2];
 
-    int input = 0;
-    int output = 1;
-    if (inputBlobName != nullptr)
-    {
-        input = _engine->getBindingIndex(inputBlobName);
-    }
-    else
-    {
-        inputBlobName = _engine->getBindingName(input);
-    }
-    if (outputBlobName != nullptr)
-    {
-        output = _engine->getBindingIndex(outputBlobName);
-    }
-    else
-    {
-        outputBlobName = _engine->getBindingName(output);
-    }
-
-    assert(_engine->getTensorDataType(inputBlobName) == DataType::kFLOAT);
-    assert(_engine->getTensorDataType(outputBlobName) == DataType::kFLOAT);
+    assert(_engine->getTensorDataType(_input_name) == DataType::kFLOAT);
+    assert(_engine->getTensorDataType(_output_name) == DataType::kFLOAT);
 
     // Create GPU buffers on device
-    CHECK(cudaMalloc(&buffers[input], _channels * _height * _width * sizeof(float)));
-    CHECK(cudaMalloc(&buffers[output], _output_size * sizeof(float)));
+    CHECK(cudaMalloc(&buffers[_input], _channels * _height * _width * sizeof(float)));
+    CHECK(cudaMalloc(&buffers[_output], _output_size * sizeof(float)));
 
     // Create stream
     cudaStream_t stream;
     CHECK(cudaStreamCreate(&stream));
 
     // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
-    CHECK(cudaMemcpyAsync(buffers[input], _input, _channels * _height * _width * sizeof(float), cudaMemcpyHostToDevice, stream));
+    CHECK(cudaMemcpyAsync(buffers[_input], _input_buffer, _channels * _height * _width * sizeof(float), cudaMemcpyHostToDevice, stream));
     
     (_context->enqueueV2(buffers, stream, nullptr));
 
-    CHECK(cudaMemcpyAsync(_output, buffers[output], _output_size * sizeof(float), cudaMemcpyDeviceToHost, stream));
+    CHECK(cudaMemcpyAsync(_output_buffer, buffers[_output], _output_size * sizeof(float), cudaMemcpyDeviceToHost, stream));
     cudaStreamSynchronize(stream);
 
     // Release stream and buffers

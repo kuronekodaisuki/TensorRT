@@ -4,7 +4,8 @@
 #define INPUT_BLOB_NAME "images"
 #define OUTPUT_BLOB_NAME "output"
 
-YOLOX::YOLOX()
+
+YOLOX::YOLOX() : TensorRT(INPUT_BLOB_NAME, OUTPUT_BLOB_NAME)
 {
 }
 
@@ -103,7 +104,7 @@ void YOLOX::blobFromImage(cv::Mat& image, bool bgr2rgb)
         {
             for (uint w = 0; w < _width; w++)
             {
-                _input[c * _width * _height + h * _width + w] = (float)_resized.at<cv::Vec3b>(h, w)[c];
+                _input_buffer[c * _width * _height + h * _width + w] = (float)_resized.at<cv::Vec3b>(h, w)[c];
             }
         }
     }
@@ -122,11 +123,11 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
         const size_t offset = anchor_idx * (_numClasses + 5);
 
         // yolox/models/yolo_head.py decode logic
-        float x_center = (_output[offset + 0] + grid0) * stride;
-        float y_center = (_output[offset + 1] + grid1) * stride;
-        float w = exp(_output[offset + 2]) * stride;
-        float h = exp(_output[offset + 3]) * stride;
-        float box_objectness = _output[offset + 4];
+        float x_center = (_output_buffer[offset + 0] + grid0) * stride;
+        float y_center = (_output_buffer[offset + 1] + grid1) * stride;
+        float w = exp(_output_buffer[offset + 2]) * stride;
+        float h = exp(_output_buffer[offset + 3]) * stride;
+        float box_objectness = _output_buffer[offset + 4];
 
         float x0 = x_center - w / 2;
         float y0 = y_center - h / 2;
@@ -135,7 +136,7 @@ void YOLOX::generate_yolox_proposals(float prob_threshold)
 
         for (size_t class_idx = 0; class_idx < _numClasses; class_idx++)
         {
-            float box_cls_score = _output[offset + 5 + class_idx];
+            float box_cls_score = _output_buffer[offset + 5 + class_idx];
             float box_prob = box_objectness * box_cls_score;
             if (prob_threshold < box_prob)
             {
