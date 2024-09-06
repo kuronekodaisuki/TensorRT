@@ -14,7 +14,21 @@
       <AdditionalDependencies>gstreamer-1.0.lib;gstapp-1.0.lib;gstbase-1.0.lib;gstvideo-1.0.lib;gobject-2.0.lib;gstaudio-1.0.lib;gstcodecs-1.0.lib;gstriff-1.0.lib;glib-2.0.lib;gstpbutils-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) $(GST_PLUGIN_SYSTEM_PATH) </Command>
+      <Command>copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\gstaudio-1.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\gstapp-1.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\gstbase-1.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\gstpbutils-1.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\gstreamer-1.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\gstriff-1.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\gsttag-1.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\gstvideo-1.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\glib-2.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\gmodule-2.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\gobject-2.0-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\intl-8.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\orc-0.4-0.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\ffi-7.dll $(OutDir)
+copy $(GSTREAMER_1_0_ROOT_MSVC_X86_64)bin\z-1.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
