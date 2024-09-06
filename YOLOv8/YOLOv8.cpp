@@ -1,47 +1,10 @@
 ﻿// YOLOv8.cpp : このファイルには 'main' 関数が含まれています。プログラム実行の開始と終了がそこで行われます。
 //
-
+#include <chrono>
 
 #include "YOLOv8.h"
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <stdint.h> // portable: uint64_t   MSVC: __int64 
-
-// MSVC defines this in winsock2.h!?
-typedef struct timeval {
-    long tv_sec;
-    long tv_usec;
-} timeval;
-
-int gettimeofday(struct timeval* tp, struct timezone* tzp)
-{
-    // Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
-    // This magic number is the number of 100 nanosecond intervals since January 1, 1601 (UTC)
-    // until 00:00:00 January 1, 1970 
-    static const uint64_t EPOCH = ((uint64_t)116444736000000000ULL);
-
-    SYSTEMTIME  system_time;
-    FILETIME    file_time;
-    uint64_t    time;
-
-    GetSystemTime(&system_time);
-    SystemTimeToFileTime(&system_time, &file_time);
-    time = ((uint64_t)file_time.dwLowDateTime);
-    time += ((uint64_t)file_time.dwHighDateTime) << 32;
-
-    tp->tv_sec = (long)((time - EPOCH) / 10000000L);
-    tp->tv_usec = (long)(system_time.wMilliseconds * 1000);
-    return 0;
-}
-#else
-#include <sys/time.h>
-#endif
-static double __get_us(struct timeval t) { return (t.tv_sec * 1000000 + t.tv_usec); }
-
-
-YOLOv8::YOLOv8()
+YOLOv8::YOLOv8(const char* input, const char* output, int batch_size): TensorRT(input, output, batch_size)
 {
 
 }
@@ -66,14 +29,18 @@ bool YOLOv8::Initialize(const char* model_path, int model_width, int model_heigh
 
 std::vector<Object> YOLOv8::Detect(cv::Mat image)
 {
-    timeval start, stop;
+    std::chrono::high_resolution_clock clock;
+    std::chrono::steady_clock::time_point start, stop;
+
     char buffer[80];
 	preProcess(image);
 
-    gettimeofday(&start, NULL);
-	doInference("images", "output0");
-    gettimeofday(&stop, NULL);
-    sprintf(buffer, "%.2f ms", (__get_us(stop) - __get_us(start)) / 1000);
+    start = clock.now();
+	doInference();
+    stop = clock.now();
+
+    sprintf(buffer, "%.2f ms", std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start).count() * 1.0e-6);
+
     cv::putText(image, buffer, cv::Point(0, 10), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255, 255, 255));
 	//puts("doInferece");
 	return postProcess(_width / (float)image.cols, _height / (float)image.rows);
