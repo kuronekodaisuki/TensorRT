@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.8)
 
 project(YOLOX DESCRIPTION "YOLOX inference demo")
 
+set(TENSORRT_PATH /opt/nvidia/TensorRT)
+
 include(
 	../TensorRT.cmake
 )
