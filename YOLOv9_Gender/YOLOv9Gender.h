@@ -1,9 +1,17 @@
 #pragma once
-#ifndef OBJECT_INCLUDED
+#ifndef YOLOv9_INCLUDED
+#define YOLOv9_INCLUDED
 
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
 
-#include "80categories.h"
+#include "../include/TensorRT.h"
+
+#define NMS_THRESH 0.45f
+#define BBOX_CONF_THRESH 0.25f
+#define NUM_CLASSES 3
+
+static cv::Scalar colors[NUM_CLASSES] = { cv::Scalar(255, 0, 0), cv::Scalar(0, 0, 255), cv::Scalar(255, 255, 255) };
+static const char* labels[NUM_CLASSES] = {"Male", "Female", "Unknown"};
 
 class Object
 {
@@ -16,11 +24,9 @@ public:
         return prob > right.prob;
     }
 
-    bool Send(std::ostream& stream);
-
     void Draw(cv::Mat& image)
     {
-        cv::Scalar color = cv::Scalar((uint)(color_list[label][0] * 255), (uint)(color_list[label][1] * 255), (uint)(color_list[label][2] * 255));
+        cv::Scalar color = colors[label];
         float c_mean = (float)cv::mean(color)[0];
 
         cv::Scalar txt_color;
@@ -34,7 +40,7 @@ public:
         cv::rectangle(image, rect, color * 255, 2);
 
         char text[256];
-        sprintf(text, "%s %.1f%%", class_names[label], prob * 100);
+        sprintf(text, "%s %.1f%%", labels[label], prob * 100);
 
         int baseLine = 0;
         cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, &baseLine);
@@ -56,5 +62,36 @@ public:
             cv::FONT_HERSHEY_SIMPLEX, 0.4, txt_color, 1);
     }
 };
-#define OBJECT_INCLUDED
+
+typedef struct
+{
+    float cx;
+    float cy;
+    float w;
+    float h;
+    float scores[NUM_CLASSES];
+} CHANNEL;
+
+class YOLOv9Gender : public TensorRT
+{
+public:
+    bool Initialize(const char* model_path, int model_width, int model_height);
+    std::vector<Object> Detect(cv::Mat image);
+
+protected:
+    void preProcess(cv::Mat& image);
+    std::vector<Object> postProcess(float scaleX, float scaleY);
+
+    void generate_proposals(float scaleX, float scaleY, float prob_threshold);
+    std::vector<int> nms(float nms_threshold);
+
+private:
+    float _nms_threshold = NMS_THRESH;
+    float _bbox_confidential_threshold = BBOX_CONF_THRESH;
+    uint _numClasses = NUM_CLASSES;
+
+    std::vector<Object> _proposals;
+    std::vector<Object> _objects;
+};
+
 #endif

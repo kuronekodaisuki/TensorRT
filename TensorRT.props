@@ -14,12 +14,17 @@
       <AdditionalLibraryDirectories>$(TENSORRT_DIR)/lib;$(CUDA_PATH)/lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>cuda.lib;cudart.lib;nvinfer.lib;nvonnxparser.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y $(TENSORRT_DIR)\lib\nvinfer.dll $(OutDir)
+copy /Y $(TENSORRT_DIR)\lib\nvinfer_builder_resource.dll $(OutDir)
+copy /Y $(TENSORRT_DIR)\lib\nvinfer_plugin.dll $(OutDir)
+copy /Y $(TENSORRT_DIR)\lib\nvonnxparser.dll $(OutDir)
+copy /Y $(TENSORRT_DIR)\lib\nvparsers.dll $(OutDir)
+copy /Y "$(CUDA_PATH)\bin\cudnn*.dll" $(OutDir)
+copy /Y ..\3rdparty\zlibwapi.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <BuildMacro Include="CUDA_PATH">
-      <Value>$(CUDA_PATH)</Value>
-      <EnvironmentVariable>true</EnvironmentVariable>
-    </BuildMacro>
     <BuildMacro Include="TENSORRT_DIR">
       <Value>$(TENSORRT_DIR)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>

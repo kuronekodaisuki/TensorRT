@@ -48,7 +48,7 @@ namespace nvonnxparser
 class API TensorRT
 {
 public:
-    TensorRT();
+    TensorRT(const char* input, const char* output);
     ~TensorRT();
 
     enum PRECISION {
@@ -67,12 +67,14 @@ public:
     /// <param name="channels">channels of model</param>
     /// <param name="prescision"></param>
     /// <returns>false if failed to load</returns>
-    virtual bool LoadModel(const char* filepath, uint width, uint height, uint channels, PRECISION precision = FP16);
+    virtual bool LoadModel(const char* filepath, uint width, uint height, uint channels = 3, PRECISION precision = FP16);
 
-    virtual bool LoadEngine(const char* filepath, uint width, uint height, uint channels);
+    virtual bool LoadEngine(const char* filepath, uint width, uint height, uint channels = 3);
+    
     void SaveEngine(const char* filepath);
 
-    void ShowResized(const char* title);
+    //void ShowResized(const char* title);
+
     cv::Size GetScaledSize() {
         return cv::Size(_width, _height);
     }
@@ -84,9 +86,7 @@ protected:
     /// <summary>
     /// Inference
     /// </summary>
-    /// <param name="input">blob name of input</param>
-    /// <param name="output">blob name of output</param>
-    virtual void doInference(const char* input = nullptr, const char* output = nullptr);
+    virtual void doInference();
 
     bool LoadONNX(const char* filepath, uint width, uint height, uint channels, PRECISION precision);
     //bool LoadUff(const char* filepath, uint width, uint height, uint channels);
@@ -94,8 +94,12 @@ protected:
     uint _width;
     uint _height;
     uint _channels;
-    float* _input;
-    float* _output;
+    int _input;
+    int _output;
+    const char* _input_name;
+    const char* _output_name;
+    float* _input_buffer;
+    float* _output_buffer;
     cv::Mat _resized;
     std::vector<uint> _output_shape;
 
