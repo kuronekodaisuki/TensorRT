@@ -2,7 +2,23 @@
 //
 #include <opencv2/opencv.hpp>
 #ifdef _MSC_VER
+// Windows
+#include <Windows.h>
+/// return a timestamp with sub-second precision
+/** QueryPerformanceCounter and clock_gettime have an undefined starting point (null/zero)
+	and can wrap around, i.e. be nulled again. **/
+double seconds()
+{
+	static LARGE_INTEGER frequency;
+	if (frequency.QuadPart == 0)
+		::QueryPerformanceFrequency(&frequency);
+	LARGE_INTEGER now;
+	::QueryPerformanceCounter(&now);
+	return now.QuadPart / double(frequency.QuadPart);
+}
 #else
+// Linux
+
 #include <time.h>
 double seconds()
 {
