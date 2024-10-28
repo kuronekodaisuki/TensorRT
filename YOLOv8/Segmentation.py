@@ -7,8 +7,10 @@ def Inference(config):
     print(file)
     model = YOLO('yolov8m-seg.pt')
     results = model.predict(source=file, imgsz=config.size)
-    for r in results:
-        print(r.masks)
+    for result in results:
+        print(result.masks)
+        result.show()
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
