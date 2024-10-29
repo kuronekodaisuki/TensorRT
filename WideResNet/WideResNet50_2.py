@@ -8,7 +8,7 @@ def Classificate(config):
     filename = os.path.join(config.path, config.filename)
     print(filename)
 
-    model = models.wide_resnet50_2(pretrained=True)
+    model = models.wide_resnet50_2(weights = models.Wide_ResNet50_2_Weights.IMAGENET1K_V2)
 
     preprocess = transforms.Compose([
         transforms.Resize(256),
