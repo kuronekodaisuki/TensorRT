@@ -14,7 +14,7 @@ typedef struct
 
 namespace vitis
 {
-    std::unique_ptr<YOLOv8> create(const std::string& model_name, bool need_preprocess)
+    std::unique_ptr<YOLOv8> YOLOv8::create(const std::string& model_name, bool need_preprocess)
     {
         YOLOv8* yolo = new YOLOv8();
         yolo->LoadEngine(model_name.c_str(), 0, 0);
