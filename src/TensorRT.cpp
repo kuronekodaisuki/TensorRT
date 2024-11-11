@@ -289,7 +289,7 @@ bool TensorRT::LoadONNX(const char* filepath, uint width, uint height, uint chan
 /// Convert image to tensor(1, channels, width, height)
 /// </summary>
 /// <param name="image"></param>
-void TensorRT::blobFromImage(cv::Mat& image, bool bgr2rgb)
+void TensorRT::blobFromImage(const cv::Mat& image, bool bgr2rgb)
 {
     cv::resize(image, _resized, cv::Size(_width, _height));
     if (bgr2rgb)

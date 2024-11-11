@@ -80,7 +80,7 @@ public:
     }
 
 protected:
-    virtual void blobFromImage(cv::Mat& image, bool bgr2rgb = true);
+    virtual void blobFromImage(const cv::Mat& image, bool bgr2rgb = true);
     virtual void imageFromBlob(cv::Mat& image, bool rgb2bgr = true);
 
     /// <summary>

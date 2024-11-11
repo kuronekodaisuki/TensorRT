@@ -15,6 +15,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YOLOX", "YOLOX\YOLOX.vcxpro
 		{AC061E72-C89B-4992-BF62-5F750E012B3D} = {AC061E72-C89B-4992-BF62-5F750E012B3D}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Vitis-AI", "Vitis-AI\Vitis-AI.vcxproj", "{E061BA0B-33C4-4433-B076-C378EC834DE8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AC061E72-C89B-4992-BF62-5F750E012B3D} = {AC061E72-C89B-4992-BF62-5F750E012B3D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -33,6 +38,10 @@ Global
 		{14D280E5-8528-4030-B590-3DA15F236055}.Debug|x64.Build.0 = Debug|x64
 		{14D280E5-8528-4030-B590-3DA15F236055}.Release|x64.ActiveCfg = Release|x64
 		{14D280E5-8528-4030-B590-3DA15F236055}.Release|x64.Build.0 = Release|x64
+		{E061BA0B-33C4-4433-B076-C378EC834DE8}.Debug|x64.ActiveCfg = Debug|x64
+		{E061BA0B-33C4-4433-B076-C378EC834DE8}.Debug|x64.Build.0 = Debug|x64
+		{E061BA0B-33C4-4433-B076-C378EC834DE8}.Release|x64.ActiveCfg = Release|x64
+		{E061BA0B-33C4-4433-B076-C378EC834DE8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
