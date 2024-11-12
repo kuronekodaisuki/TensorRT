@@ -210,10 +210,6 @@ static size_t filesize(const char* filepath)
 
 bool TensorRT::LoadEngine(const char* filepath, uint width, uint height, uint channels)
 {
-    _width = width;
-    _height = height;
-    _channels = channels;
-
     size_t size = filesize(filepath);
     
     // If failed to access engine, Throw exception
@@ -228,7 +224,18 @@ bool TensorRT::LoadEngine(const char* filepath, uint width, uint height, uint ch
 
     if (_engine != nullptr)
     {
-        auto dimensions = _engine->getBindingDimensions(1);
+        if (width == 0 || height == 0)
+        {
+            auto dimensions = _engine->getBindingDimensions(0);
+            _width = dimensions.d[2];
+            _height = dimensions.d[3];
+        }
+        else
+        {
+            _width = width;
+            _height = height;
+        }
+        _channels = channels;
 
         AllocateBuffers();
 

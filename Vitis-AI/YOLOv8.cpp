@@ -20,8 +20,7 @@ namespace vitis
         if (LoadEngine(model_name.c_str(), width, height))
         {
             auto dimensions = _engine->getBindingDimensions(0);
-            _width = dimensions.d[2];
-            _height = dimensions.d[3];
+
             printf("Width: %d Height: %d\n", _width, _height);
             for (int i = 0; i < dimensions.nbDims; i++)
             {
