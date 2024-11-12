@@ -9,6 +9,10 @@ const std::string MODEL = "../models/yolov8s.engine";
 
 int main(int argc, char* argv[])
 {
-    std::unique_ptr<vitis::YOLOv8> yolo = vitis::YOLOv8::create(MODEL);
+    vitis::YOLOv8 yolo;
+    if (yolo.create(MODEL))
+    {
+        puts(MODEL.c_str());
+    }
 }
 

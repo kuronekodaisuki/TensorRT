@@ -21,13 +21,14 @@ namespace vitis
 	{
 		std::vector<Box> bboxes;
 	};
-
+ 
 	class YOLOv8 : public TensorRT
 	{
 	public:
-		static std::unique_ptr<YOLOv8> create(const std::string& model_name, bool need_preprocess = true);
 		YOLOv8();
 		~YOLOv8();
+
+		bool create(const std::string& model_name, uint width = 0, uint height = 0, uint channels = 3);
 
 		YOLOv8Result run(const cv::Mat& image);
 		//std::vector<YOLOv8Result> run(std::vector<cv::Mat>& images);

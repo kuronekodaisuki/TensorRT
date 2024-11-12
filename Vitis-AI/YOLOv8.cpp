@@ -1,6 +1,7 @@
 ///
 ///
 ///
+#include <NvInferRuntime.h>
 #include "YOLOv8.h"
 
 typedef struct
@@ -14,12 +15,21 @@ typedef struct
 
 namespace vitis
 {
-    std::unique_ptr<YOLOv8> YOLOv8::create(const std::string& model_name, bool need_preprocess)
+    bool YOLOv8::create(const std::string& model_name, uint width, uint height, uint channels)
     {
-        YOLOv8* yolo = new YOLOv8();
-        yolo->LoadEngine(model_name.c_str(), 0, 0);
-
-        return (std::unique_ptr<YOLOv8>)yolo;
+        if (LoadEngine(model_name.c_str(), width, height))
+        {
+            auto dimensions = _engine->getBindingDimensions(0);
+            _width = dimensions.d[2];
+            _height = dimensions.d[3];
+            printf("Width: %d Height: %d\n", _width, _height);
+            for (int i = 0; i < dimensions.nbDims; i++)
+            {
+                printf("%d, ", dimensions.d[i]);
+            }
+            return true;
+        }
+        return false;
     }
 
     YOLOv8::YOLOv8() : TensorRT("images", "output0")
