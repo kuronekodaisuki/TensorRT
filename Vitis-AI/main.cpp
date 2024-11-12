@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
             {
                 int label = result.label;
                 auto& box = result.box;
+                printf("Label:%d Box:%d %d - %d %d\n", label, box[0], box[1], box[2], box[3]);
                 cv::rectangle(image, cv::Point(box[0], box[1]), cv::Point(box[2], box[3]), cv::Scalar());
                 cv::imshow("result", image);
                 cv::waitKey(0);

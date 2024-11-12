@@ -24,7 +24,7 @@ namespace vitis
             printf("Width: %d Height: %d\n", _width, _height);
             for (int i = 0; i < dimensions.nbDims; i++)
             {
-                printf("%d, ", dimensions.d[i]);
+                //printf("%d, ", dimensions.d[i]);
             }
             return true;
         }
