@@ -1,3 +1,6 @@
+#include <chrono>
+#include <NvInferRuntime.h>
+
 #include "YOLOX.h"
 
 
@@ -18,6 +21,9 @@ bool YOLOX::LoadModel(const char* filepath, uint width, uint height, uint channe
 {
     if (TensorRT::LoadModel(filepath, width, height, channels, precision))
     {
+        auto dimensions = _engine->getBindingDimensions(0);
+        _width = dimensions.d[2];
+        _height = dimensions.d[3];
         _grid_strides = generate_grids_and_stride();
         return true;
     }
@@ -29,6 +35,10 @@ bool YOLOX::LoadEngine(const char* filepath, uint width, uint height, uint chann
 {
     if (TensorRT::LoadEngine(filepath, width, height, channels))
     {
+        auto dimensions = _engine->getBindingDimensions(0);
+        _width = dimensions.d[2];
+        _height = dimensions.d[3];
+
         _grid_strides = generate_grids_and_stride();
         return true;
     }

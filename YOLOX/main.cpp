@@ -32,7 +32,7 @@ double seconds()
 #include "../include/Object.h"
 
 const char* MODEL = "../models/yolox_m_1088x1920.onnx";
-const char* ENGINE = "../models/yolox_m_188x1920.trt";
+const char* ENGINE = "../models/yolox_m_1088x1920.trt";
 const int MODEL_WIDTH = 1920;
 const int MODEL_HEIGHT = 1088;
 
@@ -54,9 +54,8 @@ int main(int argc, char* argv[])
 {
 	cv::Mat image;
 	YOLOX yolo;
-	if (FileExists(ENGINE))
+	if (FileExists(ENGINE) && yolo.LoadEngine(ENGINE, MODEL_WIDTH, MODEL_HEIGHT))
 	{
-		yolo.LoadEngine(ENGINE, MODEL_WIDTH, MODEL_HEIGHT);
 	}
 	else
 	{
