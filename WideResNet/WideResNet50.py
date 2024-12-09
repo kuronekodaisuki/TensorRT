@@ -26,4 +26,4 @@ torch.onnx.export(model, dummy_input, onnx_file_path,
                       'output': {0: 'batch_size'}
                   })
 
-print("Model successfully exported to ONNX format!")#onnx_model = torch.onnx.dynamo_export(model, input)
+print("Model successfully exported to ONNX format!")
