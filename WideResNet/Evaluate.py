@@ -1,3 +1,7 @@
+#import warnings
+
+#warnings.filterwarnings("error")
+
 import torch
 from torchvision import models, transforms
 from sklearn.metrics import f1_score, confusion_matrix
@@ -13,20 +17,34 @@ class MyImageFolder(ImageFolder):
         self.samples = self._make_dataset(self.samples)
         self.imgs = self.samples
         self.targets = [s[1] for s in self.samples]
+        with open("imagenet_classes.txt", "r") as f:
+            self.classes = [s.strip() for s in f.readlines()]
+        #print(self.classes)
 
     def _my_classes(self):
-        classes = ['duck', 'wolf']
-        class_to_idx = {classes[i]: i for i in range(len(classes))}
+        #classes = ['duck', 'wolf']
+        class_to_idx = {self.classes[i]: i for i in range(len(self.classes))}
 
-        return classes, class_to_idx
+        return self.classes, class_to_idx
 
     def _make_dataset(self, samples):
         n = len(samples)
         ds = [None] * n
 
         for i, (img, cls) in enumerate(samples):
+            ds[i] = (img, self._custom_class(cls))
 
-def Evaluate():
+        return ds
+
+    def _custom_class(self, cls):
+        if cls == 0:
+            return self.classes[0]
+        if cls == 1:
+            return self.classes[1]
+        else:
+            return 'not_my_favorite_class'
+
+def Evaluate(args):
     # デバイスの設定 (GPUが利用可能ならGPUを使用)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -91,3 +109,6 @@ def Evaluate():
             ax.text(j, i, str(conf_matrix[i, j]), ha='center', va='center', color='white')
 
     plt.show()
+
+if __name__ == '__main__':
+    myImageFoler = MyImageFolder('~/Dataset/imagenet/val')
