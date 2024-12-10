@@ -1,7 +1,7 @@
 #import warnings
 
 #warnings.filterwarnings("error")
-
+import argparse
 import torch
 from torchvision import models, transforms
 from sklearn.metrics import f1_score, confusion_matrix
@@ -37,14 +37,10 @@ class MyImageFolder(ImageFolder):
         return ds
 
     def _custom_class(self, cls):
-        if cls == 0:
-            return self.classes[0]
-        if cls == 1:
-            return self.classes[1]
-        else:
-            return 'not_my_favorite_class'
+        return self.classes[cls]
 
 def Evaluate(args):
+    dataset = args.dataset
     # デバイスの設定 (GPUが利用可能ならGPUを使用)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -62,7 +58,7 @@ def Evaluate(args):
     ])
 
     # 例: test_data ディレクトリ内の画像データを読み込む
-    test_dataset = ImageFolder(root='test_data', transform=transform)
+    test_dataset = MyImageFolder(dataset, transform=transform)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
     # 予測と実際のラベルのリストを格納するためのリスト
@@ -72,7 +68,8 @@ def Evaluate(args):
     # 予測の実行
     with torch.no_grad():
         for images, labels in test_loader:
-            images, labels = images.to(device), labels.to(device)
+            #print(labels)
+            images, labels = (images.to(device), labels.to(device))
         
             # モデルによる予測
             outputs = model(images)
@@ -111,4 +108,7 @@ def Evaluate(args):
     plt.show()
 
 if __name__ == '__main__':
-    myImageFoler = MyImageFolder('~/Dataset/imagenet/val')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--dataset', default='~/Dataset/imagenet/val')
+    Evaluate(parser.parse_args())
+    #myImageFoler = MyImageFolder('~/Dataset/imagenet/val')
