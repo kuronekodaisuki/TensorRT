@@ -37,12 +37,13 @@ class MyImageFolder(ImageFolder):
         return ds
 
     def _custom_class(self, cls):
-        return self.classes[cls]
+        return cls
 
 def Evaluate(args):
     dataset = args.dataset
     # デバイスの設定 (GPUが利用可能ならGPUを使用)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(device)
 
     # WideResNet50_2のロード
     model = models.wide_resnet50_2(weights=models.Wide_ResNet50_2_Weights.IMAGENET1K_V2)  # 学習済みのモデル
@@ -69,7 +70,7 @@ def Evaluate(args):
     with torch.no_grad():
         for images, labels in test_loader:
             #print(labels)
-            images, labels = (images.to(device), labels.to(device))
+            images = torch.tensor(images).to(device)
         
             # モデルによる予測
             outputs = model(images)
@@ -77,6 +78,8 @@ def Evaluate(args):
         
             all_preds.extend(predicted.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
+
+    #print(all_preds, all_labels)
 
     # F1スコアの計算 (バイナリ分類かマルチクラス分類に応じて設定)
     f1 = f1_score(all_labels, all_preds, average='weighted')  # 'macro' や 'micro' も指定可能
@@ -92,7 +95,7 @@ def Evaluate(args):
     plt.title('Confusion Matrix')
     plt.xlabel('Predicted')
     plt.ylabel('True')
-    plt.colorbar()
+    #plt.colorbar()
 
     # ラベルの表示
     classes = test_dataset.classes  # クラスラベル
