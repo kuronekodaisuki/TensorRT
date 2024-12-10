@@ -24,6 +24,9 @@ def Classify(args):
                         stride=2,
                         padding=3,
                         bias=False)
+    
+    layer3 = model.layer3
+    layer4 = model.layer4
 
     preprocess = transforms.Compose([
         transforms.Resize(resize),

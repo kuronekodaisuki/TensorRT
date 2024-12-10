@@ -40,6 +40,6 @@ def Classificate(config):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--filename')
+    parser.add_argument('-f', '--filename', default='IMG_1133.jpg')
     parser.add_argument('-p', '--path', default='../images')
     Classificate(parser.parse_args())
