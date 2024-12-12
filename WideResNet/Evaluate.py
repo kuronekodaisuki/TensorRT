@@ -46,6 +46,7 @@ def Evaluate(args):
     category = args.category
     kernel_size = args.kernel
     resize = args.size
+    cropsize = args.crop
 
     print(kernel_size, resize)
 
@@ -75,7 +76,7 @@ def Evaluate(args):
     # データの準備 (例としてImageFolderでデータをロード)
     transform = transforms.Compose([
         transforms.Resize(resize),
-        transforms.CenterCrop(224),
+        transforms.CenterCrop((cropsize, cropsize)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
@@ -101,7 +102,7 @@ def Evaluate(args):
             all_preds.extend(predicted.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
 
-    print(all_preds, all_labels)
+    #print(all_preds, all_labels)
 
     # F1スコアの計算 (バイナリ分類かマルチクラス分類に応じて設定)
     f1 = f1_score(all_labels, all_preds, average='weighted')  # 'macro' や 'micro' も指定可能
@@ -138,6 +139,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--dataset', default='~/Dataset/imagenet/val')
     parser.add_argument('-c', '--category', default="imagenet_classes.txt")
     parser.add_argument('-s', '--size', default=256, type=int)
+    parser.add_argument('--crop', default=224, type=int)
     parser.add_argument('-k', '--kernel', default=7, type =int)
     Evaluate(parser.parse_args())
 
