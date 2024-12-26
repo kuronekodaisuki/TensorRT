@@ -114,25 +114,26 @@ def Evaluate(args):
     print(conf_matrix)
 
     # Confusion Matrixの可視化
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.matshow(conf_matrix, cmap=plt.cm.Blues)
-    plt.title('Confusion Matrix')
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
-    #plt.colorbar()
+    if args.show == True:
+        fig, ax = plt.subplots(figsize=(8, 6))
+        ax.matshow(conf_matrix, cmap=plt.cm.Blues)
+        plt.title('Confusion Matrix')
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        #plt.colorbar()
 
-    # ラベルの表示
-    classes = test_dataset.classes  # クラスラベル
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=90)
-    plt.yticks(tick_marks, classes)
+        # ラベルの表示
+        classes = test_dataset.classes  # クラスラベル
+        tick_marks = np.arange(len(classes))
+        plt.xticks(tick_marks, classes, rotation=90)
+        plt.yticks(tick_marks, classes)
 
-    # 各セルに値を表示
-    for i in range(conf_matrix.shape[0]):
-        for j in range(conf_matrix.shape[1]):
-            ax.text(j, i, str(conf_matrix[i, j]), ha='center', va='center', color='white')
+        # 各セルに値を表示
+        for i in range(conf_matrix.shape[0]):
+            for j in range(conf_matrix.shape[1]):
+                ax.text(j, i, str(conf_matrix[i, j]), ha='center', va='center', color='white')
 
-    plt.show()
+        plt.show()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -141,5 +142,6 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--size', default=256, type=int)
     parser.add_argument('--crop', default=224, type=int)
     parser.add_argument('-k', '--kernel', default=7, type =int)
+    parser.add_argument('--show', type=bool, default=False)
     Evaluate(parser.parse_args())
 
