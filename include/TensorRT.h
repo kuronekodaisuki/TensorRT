@@ -2,6 +2,8 @@
 #ifndef __TENSORRT_H__
 #define __TENSORRT_H__
 
+#include <cuda_fp16.h>
+
 #ifdef WIN32
 #ifdef EXPORT
 #define API __declspec(dllexport)

@@ -224,6 +224,8 @@ bool TensorRT::LoadEngine(const char* filepath, uint width, uint height, uint ch
     file.read(buffer, size);
     _runtime = createInferRuntime(logger);
     _engine = _runtime->deserializeCudaEngine(buffer, size);
+    DataType type = _engine->getTensorDataType(_output_name);
+    
     delete[] buffer;
 
     if (_engine != nullptr)
